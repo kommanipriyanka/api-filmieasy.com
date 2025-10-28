@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import fs from "node:fs";
 import pg from "pg";
-import { dbConfig } from "../config/dbConfig";
 
+import { dbConfig } from "../config/dbConfig";
 
 const { Pool } = pg;
 

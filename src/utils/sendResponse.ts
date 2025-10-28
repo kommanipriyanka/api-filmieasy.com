@@ -1,7 +1,7 @@
 import type { Context } from "hono";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import { ContentfulStatusCode } from "hono/utils/http-status";
-import { IRespWithData, IRespWithErrors } from "../types/appTypes";
+import type { IRespWithData, IRespWithErrors } from "../types/appTypes";
 
 export function sendResponse(c: Context, status: ContentfulStatusCode, message: string, data?: unknown) {
   const respData: IRespWithData = {

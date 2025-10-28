@@ -17,6 +17,10 @@ export const artists = pgTable("artists", {
   experience: integer("experience"),
   department_id: integer("department_id").references(() => departments.id),
   invited_by: integer("invited_by").references(() => users.id),
-  created_at: timestamp("created_at"),
-  updated_at: timestamp("updated_at"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
 });
+
+export type Artist = typeof artists.$inferSelect;
+export type NewArtist = typeof artists.$inferInsert;
+export type ArtistTable = typeof artists;

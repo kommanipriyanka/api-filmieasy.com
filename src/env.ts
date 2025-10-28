@@ -1,16 +1,13 @@
 import "dotenv/config";
-import type { InferOutput, ValiError } from "valibot";
 
-import { flatten, object, parseAsync, pipe, string, transform } from "valibot";
-
-export const DATABASE_URL = process.env.DATABASE_URL
-export const API_VERSION = process.env.API_VERSION
-export const PORT = process.env.PORT
-export const DB_USER = process.env.DB_USER
-export const DB_PASSWORD = process.env.DB_PASSWORD
-export const DB_HOST = process.env.DB_HOST
-export const DB_PORT = process.env.DB_PORT
-export const DB_NAME = process.env.DB_NAME
+export const DATABASE_URL = process.env.DATABASE_URL;
+export const API_VERSION = process.env.API_VERSION;
+export const PORT = process.env.PORT;
+export const DB_USER = process.env.DB_USER;
+export const DB_PASSWORD = process.env.DB_PASSWORD;
+export const DB_HOST = process.env.DB_HOST;
+export const DB_PORT = process.env.DB_PORT;
+export const DB_NAME = process.env.DB_NAME;
 
 // const VEnvSchema = object({
 //   API_VERSION: string(),

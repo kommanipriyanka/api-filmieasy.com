@@ -13,11 +13,14 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.5",
+    "argon2": "^0.44.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.5",
     "drizzle-orm": "^0.44.7",
     "fs": "^0.0.1-security",
     "hono": "^4.10.3",
+    "hono-pino": "^0.10.3",
     "pg": "^8.16.3",
     "tsx": "^4.20.6",
     "valibot": "^1.1.0"

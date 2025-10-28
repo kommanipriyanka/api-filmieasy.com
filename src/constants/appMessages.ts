@@ -10,3 +10,29 @@ export const NAME_409 = "Conflict";
 export const NAME_401 = "Unauthorized";
 export const NAME_403 = "Forbidden";
 export const NAME_400 = "Bad request";
+export const DEF_ERROR_RESP = "Internal server error";
+
+export const DB_ID_INVALID = "DB id is invalid";
+export const EMPTY_DB_DATA = "DB data is empty";
+export const DB_SAVE_DATA_FAILED = "DB save data failed";
+export const DB_UPDATE_DATA_FAILED = "DB update data failed";
+
+export const USER_REGISTERED = "User registerd successfully";
+export const DEPARTMENT_CREATED = "Department created successfully";
+
+export const EMAIL_REQUIRED = "email is required";
+export const INVALID_EMAIL = "email is invalid";
+export const PASSWORD_REQUIRED = "password is required";
+export const PASSWORD_LENGTH = "password must be atleast 8 characters";
+export const PHONE_NO_REQUIRED = "phone number is required";
+export const PHONE_NO_INVALID = "enter valid 10 digit phone number";
+export const PASSWORD_INVALID = "Password Must contain at least one uppercase, lowercase, number and special character";
+export const NAME_REQUIRED = "Name is required";
+export const USER_NOT_FOUND = "User doesnot exists with this email";
+export const INVALID_PASSWORD = "Invalid password";
+export const TOKEN_INVALID = "Authorization token is invalid";
+export const TOKEN_EXPIRED = "Authorization token expired";
+export const TOKEN_SIG_MISMATCH = "Authorization token signature mismatched";
+export const TOKEN_MISSING = "Authorization token missing";
+export const USER_EXISTS = "User exists with this email";
+export const USER_LOGIN = "Login successfully";

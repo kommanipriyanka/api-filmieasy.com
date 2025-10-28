@@ -1,4 +1,3 @@
-
 export interface IResp {
   status: number;
   success: boolean;
@@ -11,4 +10,8 @@ export interface IRespWithData<T = unknown> extends IResp {
 
 export interface IRespWithErrors extends IResp {
   errors: Record<string, string> | null;
+}
+export interface JWTUserPayload {
+  sub: number;
+  iat: number;
 }

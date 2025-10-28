@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 import fs from "node:fs";
-import { dbConfig } from "./src/config/dbConfig";
 
+import { dbConfig } from "./src/config/dbConfig";
 
 export default defineConfig({
   dialect: "postgresql",
@@ -20,4 +20,4 @@ export default defineConfig({
 
   },
 });
-console.log("hello")
+console.log("hello");
