@@ -1,0 +1,42 @@
+{
+  "name": "api-filmieasy.com",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "index",
+  "scripts": {
+    "dev": "dotenvx run -- tsx watch src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "db-mig-gen": "dotenvx run -- tsx node_modules/drizzle-kit/bin.cjs generate",
+    "db-mig-push": "dotenvx run -- drizzle-kit migrate",
+    "db:studio": "npx drizzle-kit studio"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.5",
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.31.5",
+    "drizzle-orm": "^0.44.7",
+    "fs": "^0.0.1-security",
+    "hono": "^4.10.3",
+    "pg": "^8.16.3",
+    "tsx": "^4.20.6",
+    "valibot": "^1.1.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^6.1.0",
+    "@dotenvx/dotenvx": "^1.51.0",
+    "@types/node": "^24.9.1",
+    "@types/pg": "^8.15.5",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-plugin-antfu": "^3.1.1",
+    "eslint-plugin-format": "^1.0.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-perfectionist": "^4.15.1",
+    "eslint-plugin-unicorn": "^62.0.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
