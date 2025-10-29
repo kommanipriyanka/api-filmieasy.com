@@ -5,6 +5,7 @@ export const roleTypeEnum = pgEnum("role_type", [
   "ACTRESS",
   "PRODUCER",
   "DIRECTOR",
+  "COSTUME DESIGNER",
 ]);
 
 export const genderEnum = pgEnum("gender", [

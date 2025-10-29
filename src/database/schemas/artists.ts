@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { date, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 import { departments } from "./department";
@@ -24,3 +25,10 @@ export const artists = pgTable("artists", {
 export type Artist = typeof artists.$inferSelect;
 export type NewArtist = typeof artists.$inferInsert;
 export type ArtistTable = typeof artists;
+
+export const artistsRelations = relations(artists, ({ one }) => ({
+  department: one(departments, {
+    fields: [artists.department_id],
+    references: [departments.id],
+  }),
+}));

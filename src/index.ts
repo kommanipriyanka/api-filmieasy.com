@@ -2,31 +2,34 @@ import type { Context } from "hono";
 
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 import { appConfig } from "./config/appConfig";
 import { DEF_ERROR_RESP } from "./constants/appMessages";
 import { testConnection } from "./database/db";
+import { departmentRoutes } from "./routes/departmentRoutes";
+import { authRoutes } from "./routes/authRoutes";
 import { userRoutes } from "./routes/userRoutes";
 
 const app = new Hono();
 
 const port = appConfig.port || 3000;
-const apiversion = appConfig.version;
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
+app.use("*", cors());
 
-app.route("/auth", userRoutes);
+app.route("/auth", authRoutes);
+app.route("/department", departmentRoutes);
+app.route("/user",userRoutes)
+
 app.onError((err: any, c: Context) => {
   const statusCode = err.status || 555;
   const errorMessage = err.message || DEF_ERROR_RESP;
   const method = c.req.method;
   const requestUrl = c.req.url;
   const timestamp = new Date().toISOString();
-
-  console.error(err);
-
   c.status(statusCode);
   return c.json({
     status: statusCode,

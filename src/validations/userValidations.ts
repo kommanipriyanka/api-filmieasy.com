@@ -7,7 +7,8 @@ export const vSignUpUser = v.object({
     v.string(EMAIL_REQUIRED),
     v.nonEmpty(EMAIL_REQUIRED),
     v.email(INVALID_EMAIL),
-    v.custom((val: any) => val === val.toLowerCase()),
+    v.transform(val => val.toLowerCase()),
+
   ),
 
   password: v.pipe(
@@ -35,7 +36,8 @@ export const vLoginUser = v.object({
     v.string(EMAIL_REQUIRED),
     v.nonEmpty(EMAIL_REQUIRED),
     v.email(INVALID_EMAIL),
-    v.custom((val: any) => val === val.toLowerCase()),
+    v.transform(val => val.toLowerCase()),
+
   ),
   password: v.pipe(
     v.string(PASSWORD_REQUIRED),

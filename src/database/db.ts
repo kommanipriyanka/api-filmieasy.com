@@ -3,6 +3,7 @@ import fs from "node:fs";
 import pg from "pg";
 
 import { dbConfig } from "../config/dbConfig";
+import * as schema from "./schemas/index";
 
 const { Pool } = pg;
 
@@ -21,6 +22,7 @@ const pool = new Pool({
 export async function testConnection() {
   try {
     const client = await pool.connect();
+
     console.log(" Database connection successful");
     client.release();
   }
@@ -31,5 +33,5 @@ export async function testConnection() {
   }
 }
 
-const db = drizzle(pool);
+const db = drizzle(pool, { schema });
 export default db;

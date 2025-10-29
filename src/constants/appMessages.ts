@@ -36,3 +36,11 @@ export const TOKEN_SIG_MISMATCH = "Authorization token signature mismatched";
 export const TOKEN_MISSING = "Authorization token missing";
 export const USER_EXISTS = "User exists with this email";
 export const USER_LOGIN = "Login successfully";
+
+export const DEPARTMENT_REQUIRED = "Department name is required";
+export const DEPARTMENT_EXISTS = "Department already exists";
+export const DEPARTMENTS_FETCHED = "Departments fetched successfully";
+
+export const ARTISTS_EXISTS = "Artist already exists";
+export const ARTIST_INSERTED = "Artist inserted successfully";
+export const ARTISTS_FETCHED = "Artists fetched successfully";

@@ -1,9 +1,12 @@
-import { safeParse, type BaseSchema, type InferOutput } from "valibot";
+import type { BaseSchema, InferOutput } from "valibot";
+
+import { safeParse } from "valibot";
+
 import UnprocessableEntityException from "../exceptions/unprocessableEntityException";
 
 export function validateRequestBody<TSchema extends BaseSchema<any, any, any>>(
   schema: TSchema,
-  body: unknown
+  body: unknown,
 ): InferOutput<TSchema> {
   const res = safeParse(schema, body);
 

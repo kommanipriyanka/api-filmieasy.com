@@ -9,19 +9,19 @@ export default antfu({
     semi: true,
     quotes: "double",
   },
-  ignores: ["**/migrations/*"],
+  ignores: ["**/drizzle/*"],
 }, {
   rules: {
     "no-console": ["warn"],
     "antfu/no-top-level-await": ["off"],
     "node/prefer-global/process": ["off"],
-    "node/no-process-env": ["error"],
+    "node/no-process-env": ["off"],
     "perfectionist/sort-imports": ["error", {
       tsconfigRootDir: ".",
     }],
     "unicorn/filename-case": ["error", {
       case: "camelCase",
-      ignore: ["README.md"],
+      ignore: ["README.md", "drizzle/meta/000*.json"],
     }],
   },
 });
