@@ -1,15 +1,19 @@
 import type { PgInsertValue } from "drizzle-orm/pg-core";
 
+import type { ArtistProject, ArtistProjectTable } from "../database/schemas/artistProjects";
 import type { Artist, ArtistTable } from "../database/schemas/artists";
 import type { Department, DepartmentTable } from "../database/schemas/department";
+import type { Project, ProjectTable } from "../database/schemas/projects";
 import type { User, UserTable } from "../database/schemas/users";
 
-export type DBTable = UserTable | DepartmentTable | ArtistTable;
+export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable;
 
 export type DBRecord<T extends DBTable>
   = T extends UserTable ? User
     : T extends DepartmentTable ? Department
-      : T extends ArtistTable ? Artist : null;
+      : T extends ArtistTable ? Artist
+        : T extends ProjectTable ? Project
+          : T extends ArtistProjectTable ? ArtistProject : null;
 
 export type DBNewRecord<T extends DBTable> = PgInsertValue<T>;
 

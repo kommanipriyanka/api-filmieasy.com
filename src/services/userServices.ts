@@ -1,6 +1,7 @@
-import { and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import db from "../database/db";
+import { artistProjects } from "../database/schemas/artistProjects";
 
 export async function listArtists(page: number, limit: number, filters: any[] = []) {
   const offset = (page - 1) * limit;
@@ -37,4 +38,19 @@ export async function listArtists(page: number, limit: number, filters: any[] = 
         }).format(new Date(artist.DOB))
       : null,
   }));
+}
+
+export async function getProjects(page: number, limit: number, userId: number) {
+  const offset = (page - 1) * limit;
+  const result = await db.query.artistProjects.findMany({
+    offset,
+    limit,
+    where: eq(artistProjects.artist_id, userId),
+    with: {
+      project: true,
+    },
+  },
+
+  );
+  return result.map(row => row.project);
 }

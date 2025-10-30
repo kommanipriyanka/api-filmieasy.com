@@ -22,7 +22,7 @@ const pool = new Pool({
 export async function testConnection() {
   try {
     const client = await pool.connect();
-
+    // eslint-disable-next-line no-console
     console.log(" Database connection successful");
     client.release();
   }

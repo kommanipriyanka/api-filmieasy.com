@@ -1,11 +1,8 @@
-import type { Context } from "hono";
-
 import * as argon2 from "argon2";
-import { eq } from "drizzle-orm";
 
-import type { User, UserTable } from "../database/schemas/users";
+import type { UserTable } from "../database/schemas/users";
 
-import {  INVALID_PASSWORD, USER_EXISTS, USER_LOGIN, USER_NOT_FOUND, USER_REGISTERED } from "../constants/appMessages";
+import { INVALID_PASSWORD, USER_EXISTS, USER_LOGIN, USER_NOT_FOUND, USER_REGISTERED } from "../constants/appMessages";
 import { users } from "../database/schemas/users";
 import BadRequestException from "../exceptions/badRequestException";
 import ConflictException from "../exceptions/conflictException";
@@ -46,6 +43,4 @@ export class AuthHandler {
     const data = { userDetails, access_token, refresh_token };
     return sendResponse(c, 200, USER_LOGIN, data);
   });
-
-  
 }

@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { EMAIL_REQUIRED, INVALID_EMAIL, NAME_REQUIRED, PHONE_NO_INVALID, PHONE_NO_REQUIRED } from "../constants/appMessages";
+import { DEPARTMENT_ID_REQUIRED, EMAIL_REQUIRED, GENDER_REQUIRED, INVALID_EMAIL, NAME_REQUIRED, PHONE_NO_INVALID, PHONE_NO_REQUIRED, ROLETYPE_REQUIRED } from "../constants/appMessages";
 import { genderEnum, roleTypeEnum } from "../database/schemas/enums";
 
 export const vArtistSchema = v.object({
@@ -21,13 +21,18 @@ export const vArtistSchema = v.object({
     v.nonEmpty(NAME_REQUIRED),
   ),
   gender: v.pipe(
-  v.string(),
-  v.transform((val) => val.toUpperCase()),
-  v.picklist(genderEnum.enumValues, "Invalid gender")
+    v.string(GENDER_REQUIRED),
+    v.nonEmpty(GENDER_REQUIRED),
+    v.transform(val => val.toUpperCase()),
+    v.picklist(genderEnum.enumValues, "Invalid gender"),
   ),
-  role_type: v.picklist(roleTypeEnum.enumValues, "Invalid role type"),
+  role_type: v.pipe(
+    v.string(ROLETYPE_REQUIRED),
+    v.nonEmpty(ROLETYPE_REQUIRED),
+    v.picklist(roleTypeEnum.enumValues, "Invalid role type"),
+  ),
   experience: v.optional(v.number()),
-  department_id: v.number(),
+  department_id: v.number(DEPARTMENT_ID_REQUIRED),
   DOB: v.optional(
     v.pipe(
       v.string(),

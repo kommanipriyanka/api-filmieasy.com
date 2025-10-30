@@ -7,8 +7,9 @@ import { cors } from "hono/cors";
 import { appConfig } from "./config/appConfig";
 import { DEF_ERROR_RESP } from "./constants/appMessages";
 import { testConnection } from "./database/db";
-import { departmentRoutes } from "./routes/departmentRoutes";
 import { authRoutes } from "./routes/authRoutes";
+import { departmentRoutes } from "./routes/departmentRoutes";
+import { projectRoutes } from "./routes/projectRoutes";
 import { userRoutes } from "./routes/userRoutes";
 
 const app = new Hono();
@@ -22,7 +23,8 @@ app.use("*", cors());
 
 app.route("/auth", authRoutes);
 app.route("/department", departmentRoutes);
-app.route("/user",userRoutes)
+app.route("/user", userRoutes);
+app.route("/project", projectRoutes);
 
 app.onError((err: any, c: Context) => {
   const statusCode = err.status || 555;

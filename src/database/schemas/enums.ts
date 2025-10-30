@@ -13,3 +13,5 @@ export const genderEnum = pgEnum("gender", [
   "FEMALE",
   "OTHERS",
 ]);
+
+export const projectStatusEnum = pgEnum("status", ["TODO", "ONGOING", "COMPLETED"]);
