@@ -1,9 +1,11 @@
-import { eq, inArray } from "drizzle-orm";
+import { Column, ColumnBuilderExtraConfig, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import db from "../database/db";
 import { artistProjects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
 import { listArtists } from "./userServices";
+import { projects } from "../database/schemas/projects";
+import { getRecordsCount } from "./baseDbServices";
 
 export async function getUsers(projectId: number, page: number, limit: number) {
   const filters: any[] = [];
@@ -24,3 +26,26 @@ export async function getUsers(projectId: number, page: number, limit: number) {
 
   return await listArtists(page, limit, filters);
 }
+
+export async function listProjects(page: number, limit: number,searchString?:string) {
+  const offset = (page - 1) * limit;
+  const whereCondition = searchString? ilike(projects.name, `%${searchString}%`) : undefined;
+  const projectsList = await db.query.projects.findMany({
+    where: whereCondition, 
+    with: {
+      members: {
+        columns: {
+          artist_id: true,
+        },
+      },
+    },
+    limit,
+    offset,
+    orderBy: desc(projects.created_at),
+   });
+  const result = projectsList.map(({ members, ...result }) => ({...result,membersCount: members.length,}));
+  const total_records = await getRecordsCount(projects, [whereCondition]);
+  return {total_records,result};
+}
+
+

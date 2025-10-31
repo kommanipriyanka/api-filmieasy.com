@@ -1,7 +1,9 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import db from "../database/db";
 import { artistProjects } from "../database/schemas/artistProjects";
+import { artists } from "../database/schemas/artists";
+import { projects } from "../database/schemas/projects";
 
 export async function listArtists(page: number, limit: number, filters: any[] = []) {
   const offset = (page - 1) * limit;
@@ -10,16 +12,7 @@ export async function listArtists(page: number, limit: number, filters: any[] = 
     offset,
     limit,
     where: whereCondition,
-    columns: {
-      id: true,
-      full_name: true,
-      email: true,
-      department_id: true,
-      phone: true,
-      DOB: true,
-      address: true,
-
-    },
+    orderBy:(desc(artists.created_at)),
     with: {
       department: {
         columns: {
@@ -46,6 +39,7 @@ export async function getProjects(page: number, limit: number, userId: number) {
     offset,
     limit,
     where: eq(artistProjects.artist_id, userId),
+    orderBy:(desc(projects.created_at)),
     with: {
       project: true,
     },

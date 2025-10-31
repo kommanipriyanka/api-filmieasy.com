@@ -55,3 +55,5 @@ export const PROJECT_CREATED = "Project created successfully";
 export const PROJECT_NAME_REQUIRED = "Name is required";
 export const PROJECT_ID_REQUIRED = "Project id is required";
 export const PROJECT_USERS_FETCHED = "Project users fetched successfully";
+export const PROJECT_DETAILS = "Project details fetched successfully";
+export const PROJECTS_FETCHED = "Projects fetched successfully;"

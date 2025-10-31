@@ -5,15 +5,17 @@ import type { Artist, ArtistTable } from "../database/schemas/artists";
 import type { Department, DepartmentTable } from "../database/schemas/department";
 import type { Project, ProjectTable } from "../database/schemas/projects";
 import type { User, UserTable } from "../database/schemas/users";
+import { Scene, SceneTable } from "../database/schemas/scenes";
 
-export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable;
+export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable | SceneTable;
 
 export type DBRecord<T extends DBTable>
   = T extends UserTable ? User
     : T extends DepartmentTable ? Department
       : T extends ArtistTable ? Artist
         : T extends ProjectTable ? Project
-          : T extends ArtistProjectTable ? ArtistProject : null;
+          : T extends ArtistProjectTable ? ArtistProject 
+            : T extends SceneTable ? Scene : null;
 
 export type DBNewRecord<T extends DBTable> = PgInsertValue<T>;
 
