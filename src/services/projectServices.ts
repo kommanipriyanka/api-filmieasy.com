@@ -1,4 +1,4 @@
-import { Column, ColumnBuilderExtraConfig, desc, eq, ilike, inArray } from "drizzle-orm";
+import { and, Column, ColumnBuilderExtraConfig, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import db from "../database/db";
 import { artistProjects } from "../database/schemas/artistProjects";
@@ -27,9 +27,14 @@ export async function getUsers(projectId: number, page: number, limit: number) {
   return await listArtists(page, limit, filters);
 }
 
-export async function listProjects(page: number, limit: number,searchString?:string) {
+export async function listProjects(page: number, limit: number,userId:number,searchString?:string) {
   const offset = (page - 1) * limit;
-  const whereCondition = searchString? ilike(projects.name, `%${searchString}%`) : undefined;
+  const whereCondition = searchString
+    ? and(
+        eq(projects.created_by, userId),
+        ilike(projects.name, `%${searchString}%`)
+      )
+    : eq(projects.created_by, userId);
   const projectsList = await db.query.projects.findMany({
     where: whereCondition, 
     with: {

@@ -24,7 +24,7 @@ export class DepartmentHandler {
 
   listDepartments = factory.createHandlers(async (c) => {
     const search_string = c.req.query("search_string");
-    let whereQueryData: WhereQueryData<typeof departments> | undefined;
+    let whereQueryData: WhereQueryData<DepartmentTable> | undefined;
     if (search_string) {
       whereQueryData = {
         columns: ["name"],

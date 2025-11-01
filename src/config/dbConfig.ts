@@ -1,9 +1,8 @@
-import { DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER } from "../env";
-
+import 'dotenv/config';
 export const dbConfig = {
-  host: DB_HOST,
-  port: Number(DB_PORT)!,
-  user: DB_USER!,
-  password: DB_PASSWORD!,
-  database: DB_NAME!,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT)!,
+  user:process.env.DB_USER!,
+  password: process.env.DB_PASSWORD!,
+  database: process.env.DB_NAME!,
 };

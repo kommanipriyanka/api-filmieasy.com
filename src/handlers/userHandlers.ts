@@ -15,7 +15,7 @@ import { getProjects, listArtists } from "../services/userServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vArtistSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-
+ 
 export class UserHandler {
   inviteArtists = factory.createHandlers(async (c: Context) => {
     const reqData = await c.req.json();
@@ -33,25 +33,22 @@ export class UserHandler {
     const query = c.req.query();
     const page = +query.page || 1;
     const limit = +query.pageSize || 10;
-    const departmentId = query.departmentId ? Number(query.departmentId) : undefined;
+    const user:User= c.get("user_payload")
     const searchString = query.searchString?.trim();
-    const filters = [];
-    if (departmentId) {
-      filters.push(eq(artists.department_id, departmentId));
-    }
+    const filters = [eq(artists.invited_by,user.id)];
     if (searchString) {
       filters.push(ilike(artists.full_name, `%${searchString}%`));
     }
     const [allArtists, totalRecords] = await Promise.all([
       listArtists(page, limit, filters),
       getRecordsCount(artists, filters),
-    ]);
+    ]); 
     const pagination_info = getPaginationData(page, limit, totalRecords);
     const response = { pagination_info, records: allArtists };
     return sendResponse(c, 200, ARTISTS_FETCHED, response);
   });
 
-  getUserProjects = factory.createHandlers(async (c: Context) => {
+  getArtistProjects = factory.createHandlers(async (c: Context) => {
     const id = +c.req.param("id");
     const page = +(c.req.query("page") || 1);
     const limit = +(c.req.query("limit") || 10);
@@ -60,7 +57,7 @@ export class UserHandler {
     const filters = [eq(artistProjects.artist_id, id)];
 
     const [records, totalRecords] = await Promise.all([
-      getProjects(page, limit, id),
+      getProjects(page, limit, filters),
       getRecordsCount(artistProjects, filters),
     ]);
     const pagination_info = getPaginationData(page, limit, totalRecords);
@@ -68,7 +65,7 @@ export class UserHandler {
     return sendResponse(c, 200, USER_PROJECTS_FETCHED, response);
   });
 
-  getUser = factory.createHandlers(async (c: Context) => {
+  getArtist = factory.createHandlers(async (c: Context) => {
     const id = +c.req.param("id");
     if (!id)
       throw new BadRequestException(USER_ID_REQUIRED);

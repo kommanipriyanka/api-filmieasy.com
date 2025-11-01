@@ -1,6 +1,5 @@
-import { API_VERSION, PORT } from "../env";
+import 'dotenv/config';
 
 export const appConfig = {
-  port: Number(PORT),
-  version: API_VERSION,
+  port:Number(process.env.port),
 };

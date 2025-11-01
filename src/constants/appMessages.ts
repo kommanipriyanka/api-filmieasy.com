@@ -57,3 +57,11 @@ export const PROJECT_ID_REQUIRED = "Project id is required";
 export const PROJECT_USERS_FETCHED = "Project users fetched successfully";
 export const PROJECT_DETAILS = "Project details fetched successfully";
 export const PROJECTS_FETCHED = "Projects fetched successfully;"
+
+
+
+export const UPLOAD_URL = "Upload url generated successfully";
+export const FILE_NAME_REQUIRED = "File name is required";
+export const CONTENT_TYPE_REQUIRED = "Content type is required";
+export const DOWNLOAD_URL = "Download url generated successfully";
+export const SCENE_CREATED = "SCene created successfully";

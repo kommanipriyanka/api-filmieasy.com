@@ -17,10 +17,11 @@ import {  getUsers, listProjects } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateProject } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+import { isAuthorized } from "../middlewares/isAuthorized";
 
 export class ProjectHandler {
-  createProject = factory.createHandlers(async (c: Context) => {
-    const user: User = c.get("user_payload");
+  createProject = factory.createHandlers(isAuthorized,async (c: Context) => {
+    const user:User= c.get("user_payload");
     const reqData = await c.req.json();
     const validatedReqData = validateRequestBody(vCreateProject, reqData);
     const project = await saveRecord<ProjectTable>(projects, { ...validatedReqData, created_by: user.id });
@@ -56,10 +57,11 @@ export class ProjectHandler {
 
 
   getAllProjects = factory.createHandlers(async (c:Context)=>{
-    const page = Number(c.req.query("page") ?? 1);
-    const limit = Number(c.req.query("pageSize") ?? 10);
+    const userId = +c.get("user_payload").id;
+    const page = Number(c.req.query("page") || 1);
+    const limit = Number(c.req.query("pageSize") || 10);
     const searchString=c.req.query("searchString");
-    const {total_records,result} = await listProjects(page,limit,searchString)
+    const {total_records,result} = await listProjects(page,limit,userId,searchString)
     const pagination_info = getPaginationData(page,limit,total_records)
     const paginatedResponse = {pagination_info,records:result}
     return sendResponse(c,200,PROJECTS_FETCHED,paginatedResponse)
