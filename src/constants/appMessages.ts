@@ -64,4 +64,5 @@ export const UPLOAD_URL = "Upload url generated successfully";
 export const FILE_NAME_REQUIRED = "File name is required";
 export const CONTENT_TYPE_REQUIRED = "Content type is required";
 export const DOWNLOAD_URL = "Download url generated successfully";
-export const SCENE_CREATED = "SCene created successfully";
+export const SCENE_CREATED = "Scene created successfully";
+export const SCENE_NAME_REQUIRED = "Scene name is required"

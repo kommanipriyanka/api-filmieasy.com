@@ -1,7 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 
 import db from "../database/db";
-import { artistProjects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
 import { projects } from "../database/schemas/projects";
 

@@ -57,6 +57,13 @@
       "when": 1761963761946,
       "tag": "0007_happy_hairball",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1762145757831,
+      "tag": "0008_rare_santa_claus",
+      "breakpoints": true
     }
   ]
 }

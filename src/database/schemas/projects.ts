@@ -15,6 +15,7 @@ export const projects = pgTable("projects", {
   end_date: date("end_date"),
   status: projectStatusEnum("status").default("TODO"),
   estimated_budget: integer("estimated_budget"),
+  project_logo: varchar("project_logo"),
   created_by: integer("created_by").references(() => users.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),

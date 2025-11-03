@@ -25,7 +25,7 @@ export class UserHandler {
     if (isArtistExists) {
       throw new ConflictException(ARTISTS_EXISTS);
     }
-    const artistsData = await saveRecord(artists, { ...validatedReqData, invited_by: user.id });
+    const artistsData = await saveRecord<ArtistTable>(artists, { ...validatedReqData, invited_by: user.id });
     return sendResponse(c, 200, ARTIST_INSERTED, artistsData);
   });
 

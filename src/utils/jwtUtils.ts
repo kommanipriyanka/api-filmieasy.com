@@ -3,7 +3,6 @@ import type { Context } from "hono";
 import { sign, verify } from "hono/jwt";
 import { JwtTokenExpired, JwtTokenInvalid, JwtTokenSignatureMismatched } from "hono/utils/jwt/types";
 
-import type { User } from "../database/schemas/users";
 import type { JWTUserPayload } from "../types/appTypes";
 
 import { jwtConfig } from "../config/jwtConfig";
@@ -12,17 +11,18 @@ import { users } from "../database/schemas/users";
 import UnAuthorizedException from "../exceptions/unauthorizedException";
 import { getSingleRecordByMultipleColumnValues } from "../services/baseDbServices";
 
-export type UserPayload = User;
 
 async function genJWTTokens(payload: JWTUserPayload) {
   const now = Math.floor(Date.now() / 1000);
   const access_token_expiry = now + jwtConfig.expires_in;
   const refresh_token_expiry = now + (jwtConfig.expires_in * 3);
 
-  const access_token = await sign({ ...payload, exp: access_token_expiry }, jwtConfig.secret);
-  const refresh_token = await sign({ ...payload, exp: refresh_token_expiry }, jwtConfig.secret);
+  //  const access_token = await sign({ ...payload, exp: access_token_expiry }, jwtConfig.secret);
+  //  const refresh_token = await sign({ ...payload, exp: refresh_token_expiry }, jwtConfig.secret);
 
-  return { access_token, refresh_token };
+  const [access_token,refresh_token] = await Promise.all([sign({...payload, exp: access_token_expiry }, jwtConfig.secret),sign({ ...payload, exp: refresh_token_expiry }, jwtConfig.secret)]);
+
+   return { access_token, refresh_token };
 }
 
 async function genJWTTokensForUser(userId: number) {
