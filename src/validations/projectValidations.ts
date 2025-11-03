@@ -26,6 +26,7 @@ export const vCreateProject = v.pipe(
     start_date: v.optional(v.string()), // "2025-01-10"
     end_date: v.optional(v.string()), // "2025-01-15"
     team_members: v.optional(v.array(v.number())),
+    project_logo:v.optional(v.string()),
   }),
   v.check(
     data =>
