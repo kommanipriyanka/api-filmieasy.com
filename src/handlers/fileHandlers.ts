@@ -20,8 +20,8 @@ export class FileHandler {
     })
 
     getDownloadUrl = factory.createHandlers(async (c:Context)=>{
-        const key = await c.req.json();
-        const result = await S3Service.getPresignedDownloadUrl(key);
+        const body  = await c.req.json()
+        const result = await S3Service.getPresignedDownloadUrl(body.key);
         return sendResponse(c,200,DOWNLOAD_URL,result)
     })
 }

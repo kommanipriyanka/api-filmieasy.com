@@ -12,6 +12,7 @@ import { departmentRoutes } from "./routes/departmentRoutes";
 import { projectRoutes } from "./routes/projectRoutes";
 import { userRoutes } from "./routes/userRoutes";
 import { fileRoutes } from "./routes/fileRoutes";
+import { sceneRoutes } from "./routes/sceneRoutes";
 
 const app = new Hono();
 
@@ -26,7 +27,8 @@ app.route("/auth", authRoutes);
 app.route("/department", departmentRoutes);
 app.route("/user", userRoutes);
 app.route("/project", projectRoutes);
-app.route("/file",fileRoutes)
+app.route("/file",fileRoutes);
+app.route("/scene",sceneRoutes);
 
 app.onError((err: any, c: Context) => {
   const statusCode = err.status || 555;

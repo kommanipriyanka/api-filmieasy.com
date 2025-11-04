@@ -1,5 +1,7 @@
 import { date, integer, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 import { projects } from "./projects";
+import { relations } from "drizzle-orm";
+import { artist_scenes } from "./artistScenes";
 
 
 export const scenes = pgTable("scenes",{
@@ -19,4 +21,9 @@ export const scenes = pgTable("scenes",{
 export type Scene = typeof scenes.$inferSelect;
 export type NewScene = typeof scenes.$inferInsert;
 export type SceneTable = typeof scenes;
+
+
+export const scenesRelations = relations(scenes, ({ many }) => ({
+  artistScenes: many(artist_scenes)
+}));
 

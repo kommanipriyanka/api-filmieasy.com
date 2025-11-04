@@ -4,6 +4,7 @@ import { date, integer, pgTable, serial, text, timestamp, varchar } from "drizzl
 import { departments } from "./department";
 import { genderEnum, roleTypeEnum } from "./enums";
 import { users } from "./users";
+import { artist_scenes } from "./artistScenes";
 
 export const artists = pgTable("artists", {
   id: serial("id").primaryKey().notNull(),
@@ -26,9 +27,10 @@ export type Artist = typeof artists.$inferSelect;
 export type NewArtist = typeof artists.$inferInsert;
 export type ArtistTable = typeof artists;
 
-export const artistsRelations = relations(artists, ({ one }) => ({
+export const artistsRelations = relations(artists, ({ one ,many}) => ({
   department: one(departments, {
     fields: [artists.department_id],
     references: [departments.id],
   }),
+  artistScenes: many(artist_scenes),
 }));

@@ -9,6 +9,5 @@ export const s3 = new S3Client({
   },
   forcePathStyle: false,
 });
-console.log(s3)
 
 export const bucketName = process.env.AWS_S3_BUCKET!

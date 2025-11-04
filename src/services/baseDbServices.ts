@@ -2,7 +2,7 @@ import type { SQL } from "drizzle-orm";
 
 import { and, asc, count, desc, eq, getTableName, inArray, sql } from "drizzle-orm";
 
-import type { DBNewRecord, DBRecord, DBTable, InQueryData, OrderByQueryData, PaginationInfo, Relations, UpdateRecordData, WhereQueryData } from "../types/dbTypes";
+import type { DBNewRecord, DBRecord, DBTable, InQueryData, OrderByQueryData, PaginationInfo, Relations, Transaction, UpdateRecordData, WhereQueryData } from "../types/dbTypes";
 
 import { DB_ID_INVALID, DB_SAVE_DATA_FAILED, DB_UPDATE_DATA_FAILED, EMPTY_DB_DATA } from "../constants/appMessages";
 import db from "../database/db";
@@ -206,12 +206,15 @@ async function getSingleRecordByMultipleColumnValues<T extends DBTable, C extend
 async function saveRecord<T extends DBTable>(
   table: T,
   record: DBNewRecord<T>,
+  trx?: Transaction,
 ): Promise<DBRecord<T>> {
   if (!record) {
     throw new UnprocessableEntityException(EMPTY_DB_DATA);
   }
+  const client = trx ?? db;
 
-  const result = await db.insert(table).values(record).returning();
+
+  const result = await client.insert(table).values(record).returning();
 
   if (!Array.isArray(result) || result.length === 0) {
     throw new UnprocessableEntityException(DB_SAVE_DATA_FAILED);
@@ -223,11 +226,13 @@ async function saveRecord<T extends DBTable>(
 async function saveRecords<T extends DBTable>(
   table: T,
   records: DBNewRecord<T>[],
+  trx?:Transaction,
 ): Promise<DBRecord<T>[]> {
   if (!records) {
     throw new UnprocessableEntityException(EMPTY_DB_DATA);
   }
-  const result = await db.insert(table).values(records).returning();
+  const client = trx ?? db;
+  const result = await client.insert(table).values(records).returning();
   if (!Array.isArray(result) || result.length === 0) {
     throw new UnprocessableEntityException(DB_SAVE_DATA_FAILED);
   }

@@ -3,7 +3,7 @@ import { date, integer, pgTable, serial, text, timestamp, varchar } from "drizzl
 import { projectStatusEnum } from "./enums";
 import { users } from "./users";
 import { relations } from "drizzle-orm";
-import { artistProjects } from "./artistProjects";
+import { artist_projects } from "./artistProjects";
 
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey().notNull(),
@@ -27,5 +27,5 @@ export type NewProject = typeof projects.$inferInsert;
 export type ProjectTable = typeof projects;
 
 export const projectsRelations = relations(projects, ({ many }) => ({
-  members: many(artistProjects), 
+  members: many(artist_projects), 
 }));

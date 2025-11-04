@@ -11,7 +11,7 @@ export class s3Service{
       ContentType: contentType,
     });
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 900 });
-    return { uploadUrl, path };
+    return { uploadUrl, path:key };
   };
 
   getPresignedDownloadUrl =  (key: string): Promise<string> => {
