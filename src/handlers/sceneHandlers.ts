@@ -21,8 +21,8 @@ export class SceneHandler{
         const validatedReqData = validateRequestBody(vCreateScene,reqData)
         const scene = await saveRecord<SceneTable>(scenes,{...validatedReqData,project_id:id})
         if (validatedReqData.scene_members && validatedReqData.scene_members.length > 0) {
-            const records: newArtistScene[] = validatedReqData.scene_members.map((userId: number) => ({
-                user_id: userId,
+            const records: newArtistScene[] = validatedReqData.scene_members.map((artistId: number) => ({
+                artist_id: artistId,
                 scene_id: scene.id,
             }));
         await saveRecords<ArtistSceneTable>(artist_scenes, records);

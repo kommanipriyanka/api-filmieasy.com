@@ -1,11 +1,12 @@
 import { and, Column, ColumnBuilderExtraConfig, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import db from "../database/db";
-import { artist_projects } from "../database/schemas/artistProjects";
+import { artist_projects, ArtistProjectTable } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
 import { listArtists } from "./userServices";
-import { projects } from "../database/schemas/projects";
-import { getRecordsCount } from "./baseDbServices";
+import { projects, ProjectTable } from "../database/schemas/projects";
+import { getRecordsCount, saveRecord, saveRecords } from "./baseDbServices";
+import { CreateProject } from "../validations/projectValidations";
 
 export async function getUsers(projectId: number, page: number, limit: number) {
   const filters: any[] = [];
@@ -54,5 +55,18 @@ export async function listProjects(page: number, limit: number,userId:number,sea
 }
 
 
+export async function createProject(data:CreateProject,userId:number){
+   return await db.transaction(async (trx) => {
+   const project = await saveRecord<ProjectTable>(projects,{ ...data, created_by: userId },trx);
+    if (data.team_members && data.team_members.length > 0) {
+      const records = data.team_members.map((artistId: number) => ({
+        artist_id: artistId,
+        project_id: project.id
+      }));
+      await saveRecords<ArtistProjectTable>(artist_projects, records, trx); 
+    }
+    return project;
+  });
+};
 
 

@@ -36,6 +36,9 @@ export const vCreateProject = v.pipe(
   ),
 );
 
+export type CreateProject = v.InferInput<typeof vCreateProject>;
+
+
 
 
 

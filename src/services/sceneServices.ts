@@ -11,7 +11,7 @@ export async function getScenes(projectId: number) {
     with: {
       artistScenes: {
         with: {
-          user: true
+          artist: true
         }
       }
     }

@@ -6,7 +6,6 @@ import { DOWNLOAD_URL, UPLOAD_URL } from "../constants/appMessages";
 import { sendResponse } from "../utils/sendResponse";
 import { vSignedUrl } from "../validations/fileValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-import BadRequestException from "../exceptions/badRequestException";
 const S3Service = new s3Service();
 
 

@@ -2,8 +2,6 @@ import type { Context } from "hono";
 
 import { eq } from "drizzle-orm";
 
-import type { ArtistProjectTable } from "../database/schemas/artistProjects";
-import type { ProjectTable } from "../database/schemas/projects";
 import type { User } from "../database/schemas/users";
 
 import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_USERS_FETCHED, PROJECTS_FETCHED } from "../constants/appMessages";
@@ -13,22 +11,17 @@ import BadRequestException from "../exceptions/badRequestException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
 import { getRecordsCount, getSingleRecordByAColumnValue, saveRecord, saveRecords } from "../services/baseDbServices";
-import {  getUsers, listProjects } from "../services/projectServices";
+import {  createProject, getUsers, listProjects } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateProject} from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-import { isAuthorized } from "../middlewares/isAuthorized";
 
 export class ProjectHandler {
-  createProject = factory.createHandlers(isAuthorized,async (c: Context) => {
+  create = factory.createHandlers(async (c: Context) => {
     const user:User= c.get("user_payload");
     const reqData = await c.req.json();
     const validatedReqData = validateRequestBody(vCreateProject, reqData);
-    const project = await saveRecord<ProjectTable>(projects, { ...validatedReqData, created_by: user.id });
-    if (validatedReqData.team_members && validatedReqData.team_members.length > 0) {
-      const records = validatedReqData.team_members.map((userId: number) => ({ artist_id: userId, project_id: project.id }));
-      await saveRecords<ArtistProjectTable>(artist_projects, records);
-    }
+    const project = await createProject(validatedReqData,user.id)
     return sendResponse(c, 200, PROJECT_CREATED, project);
   });
 
@@ -66,6 +59,8 @@ export class ProjectHandler {
     const paginatedResponse = {pagination_info,records:result}
     return sendResponse(c,200,PROJECTS_FETCHED,paginatedResponse)
   })
+
+  
 
   
 }
