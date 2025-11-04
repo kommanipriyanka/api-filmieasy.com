@@ -15,7 +15,7 @@ import { getPaginationData } from "../helpers/paginationHelpers";
 import { getRecordsCount, getSingleRecordByAColumnValue, saveRecord, saveRecords } from "../services/baseDbServices";
 import {  getUsers, listProjects } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
-import { vCreateProject, vCreateProjectWithScenes } from "../validations/projectValidations";
+import { vCreateProject} from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
 import { isAuthorized } from "../middlewares/isAuthorized";
 
