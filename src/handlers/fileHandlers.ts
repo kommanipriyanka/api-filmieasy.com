@@ -6,6 +6,7 @@ import { DOWNLOAD_URL, UPLOAD_URL } from "../constants/appMessages";
 import { sendResponse } from "../utils/sendResponse";
 import { vSignedUrl } from "../validations/fileValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+import BadRequestException from "../exceptions/badRequestException";
 const S3Service = new s3Service();
 
 
@@ -20,8 +21,8 @@ export class FileHandler {
     })
 
     getDownloadUrl = factory.createHandlers(async (c:Context)=>{
-        const key = await c.req.json();
-        const result = await S3Service.getPresignedDownloadUrl(key);
+        const body  = await c.req.json()
+        const result = await S3Service.getPresignedDownloadUrl(body.key);
         return sendResponse(c,200,DOWNLOAD_URL,result)
     })
 }

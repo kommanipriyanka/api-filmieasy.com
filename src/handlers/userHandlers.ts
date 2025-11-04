@@ -5,13 +5,13 @@ import { eq, ilike } from "drizzle-orm";
 import type { ArtistTable, User } from "../database/schemas";
 
 import { ARTIST_INSERTED, ARTISTS_EXISTS, ARTISTS_FETCHED, USER_FETCHED, USER_ID_REQUIRED, USER_PROJECTS_FETCHED } from "../constants/appMessages";
-import { artistProjects, artists } from "../database/schemas";
+import { artist_projects, artists } from "../database/schemas";
 import BadRequestException from "../exceptions/badRequestException";
 import ConflictException from "../exceptions/conflictException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getRecordsCount, getSingleRecordByAColumnValue, saveRecord } from "../services/baseDbServices";
-import { getProjects, listArtists } from "../services/userServices";
+import { getMultipleRecordsByAColumnValue, getRecordsCount, getSingleRecordByAColumnValue, saveRecord } from "../services/baseDbServices";
+import { getArtistDetails, getProjects, listArtists } from "../services/userServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vArtistSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
@@ -54,11 +54,11 @@ export class UserHandler {
     const limit = +(c.req.query("limit") || 10);
     if (!id)
       throw new BadRequestException(USER_ID_REQUIRED);
-    const filters = [eq(artistProjects.artist_id, id)];
+    const filters = [eq(artist_projects.artist_id, id)];
 
     const [records, totalRecords] = await Promise.all([
       getProjects(page, limit, filters),
-      getRecordsCount(artistProjects, filters),
+      getRecordsCount(artist_projects, filters),
     ]);
     const pagination_info = getPaginationData(page, limit, totalRecords);
     const response = { pagination_info, records };
@@ -69,7 +69,12 @@ export class UserHandler {
     const id = +c.req.param("id");
     if (!id)
       throw new BadRequestException(USER_ID_REQUIRED);
-    const user = await getSingleRecordByAColumnValue(artists, "id", "=", id);
+    const user = await getArtistDetails(id)
     return sendResponse(c, 200, USER_FETCHED, user);
   });
+  getArtistsDropdown = factory.createHandlers(async (c:Context)=>{
+    const user:User = c.get("user_payload");
+    const result = await getMultipleRecordsByAColumnValue(artists,"invited_by","=",user.id,["id","full_name"])
+    return sendResponse(c,200,ARTISTS_FETCHED,result)
+    })
 }

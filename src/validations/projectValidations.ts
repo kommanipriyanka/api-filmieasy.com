@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { PROJECT_NAME_REQUIRED } from "../constants/appMessages";
+import { PROJECT_NAME_REQUIRED, SCENE_NAME_REQUIRED } from "../constants/appMessages";
 
 export const vCreateProject = v.pipe(
   v.object({
@@ -23,8 +23,8 @@ export const vCreateProject = v.pipe(
     genre: v.optional(v.string()),
     languages: v.optional(v.array(v.string())),
     estimated_budget: v.optional(v.number()),
-    start_date: v.optional(v.string()), // "2025-01-10"
-    end_date: v.optional(v.string()), // "2025-01-15"
+    start_date: v.optional(v.string()), 
+    end_date: v.optional(v.string()),
     team_members: v.optional(v.array(v.number())),
   }),
   v.check(
@@ -35,3 +35,7 @@ export const vCreateProject = v.pipe(
     "End date must be after start date",
   ),
 );
+
+
+
+

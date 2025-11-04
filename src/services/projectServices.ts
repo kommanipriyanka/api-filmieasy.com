@@ -1,7 +1,7 @@
 import { and, Column, ColumnBuilderExtraConfig, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import db from "../database/db";
-import { artistProjects } from "../database/schemas/artistProjects";
+import { artist_projects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
 import { listArtists } from "./userServices";
 import { projects } from "../database/schemas/projects";
@@ -12,8 +12,8 @@ export async function getUsers(projectId: number, page: number, limit: number) {
 
   const artistIds = await db
     .select()
-    .from(artistProjects)
-    .where(eq(artistProjects.project_id, projectId));
+    .from(artist_projects)
+    .where(eq(artist_projects.project_id, projectId));
 
   const ids = artistIds.map(a => a.artist_id);
 
@@ -52,5 +52,7 @@ export async function listProjects(page: number, limit: number,userId:number,sea
   const total_records = await getRecordsCount(projects, [whereCondition]);
   return {total_records,result};
 }
+
+
 
 

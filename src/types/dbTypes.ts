@@ -7,6 +7,7 @@ import type { Project, ProjectTable } from "../database/schemas/projects";
 import type { User, UserTable } from "../database/schemas/users";
 import { Scene, SceneTable } from "../database/schemas/scenes";
 import { ArtistScene, ArtistSceneTable } from "../database/schemas/artistScenes";
+import db from "../database/db";
 
 export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable | SceneTable | ArtistSceneTable;
 
@@ -58,3 +59,6 @@ export interface PaginatedRecords<T extends DBTable> {
   pagination_info: PaginationInfo;
   records: DBRecord<T>[];
 }
+
+export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+

@@ -35,7 +35,7 @@ export async function listArtists(page: number, limit: number, filters: any[]) {
 export async function getProjects(page: number, limit: number, filters:any[] ) {
   const offset = (page - 1) * limit;
   const whereCondition = and(...filters) 
-  const result = await db.query.artistProjects.findMany({
+  const result = await db.query.artist_projects.findMany({
     offset,
     limit,
     where:whereCondition,
@@ -47,4 +47,19 @@ export async function getProjects(page: number, limit: number, filters:any[] ) {
 
   );
   return result.map(row => row.project);
+}
+
+export async function getArtistDetails(id: number) {
+  return await db.query.artists.findFirst({
+    where: eq(artists.id, id),
+    with: {
+      department: {
+        columns: {
+          name: true,   
+        }
+      }
+    }
+  });
+
+  
 }
