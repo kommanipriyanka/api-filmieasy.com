@@ -8,8 +8,9 @@ import { validateRequestBody } from "../validations/validateRequest";
 import { vCreateScene } from "../validations/sceneValidations";
 import BadRequestException from "../exceptions/badRequestException";
 import { artist_scenes,  ArtistSceneTable,  newArtistScene } from "../database/schemas/artistScenes";
-import { getScenes } from "../services/sceneServices";
+import { SceneService } from "../services/sceneServices";
 
+const  sceneService = new SceneService();
 
 
 
@@ -41,7 +42,7 @@ export class SceneHandler{
      getAllScenes = factory.createHandlers(async (c:Context)=>{
         const projectId = +c.req.param("id");
         if(!projectId) throw new BadRequestException(SCENE_ID_REQUIRED);
-        const scene_members = await getScenes(projectId)
+        const scene_members = await sceneService.getScenes(projectId)
         return sendResponse(c,200,SCENE_MEMBERS,scene_members)
         
      })

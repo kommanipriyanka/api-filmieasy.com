@@ -2,6 +2,7 @@ import { date, integer, pgTable, serial, timestamp, varchar } from "drizzle-orm/
 import { projects } from "./projects";
 import { relations } from "drizzle-orm";
 import { artist_scenes } from "./artistScenes";
+import { location } from "./location";
 
 
 export const scenes = pgTable("scenes",{
@@ -12,8 +13,9 @@ export const scenes = pgTable("scenes",{
     start_date:date("start_date"),
     end_date:date("end_date"),
     script_path:varchar("script_path"),
+    location_id:integer("location_id").references(()=>location.id),
     created_at:timestamp("created_at").defaultNow(),
-    updated_at:timestamp("updated_at")
+    updated_at:timestamp("updated_at").defaultNow()
 
 })
 
@@ -23,7 +25,8 @@ export type NewScene = typeof scenes.$inferInsert;
 export type SceneTable = typeof scenes;
 
 
-export const scenesRelations = relations(scenes, ({ many }) => ({
-  artistScenes: many(artist_scenes)
+export const scenesRelations = relations(scenes, ({ many,one }) => ({
+  artistScenes: many(artist_scenes),
+  location:one(location)
 }));
 

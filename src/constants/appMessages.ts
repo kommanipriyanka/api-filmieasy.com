@@ -49,7 +49,7 @@ export const ARTIST_INSERTED = "Artist inserted successfully";
 export const ARTISTS_FETCHED = "Artists fetched successfully";
 export const GENDER_REQUIRED = "Gender is required"
 export const DEPARTMENT_ID_REQUIRED = "Department is required"
-export const ROLETYPE_REQUIRED = "Role type is required"
+export const ROLE_TYPE_REQUIRED = "Role type is required"
 
 export const PROJECT_CREATED = "Project created successfully";
 export const PROJECT_NAME_REQUIRED = "Name is required";
@@ -69,3 +69,11 @@ export const SCENE_NAME_REQUIRED = "Scene name is required";
 export const PROJECT_SCENES_FETCHED = "Project scenes fetched successfully";
 export const SCENE_ID_REQUIRED = "Scene id is required";
 export const SCENE_MEMBERS = "Scene members fetched successfully";
+
+
+export const LOCATION_CREATED = "Location created successfully";
+export const LOCATIONS_FETCHED = "All Locations fetched successfully";
+export const PROJECT_LOCATIONS = "Project locations fetched successfully";
+
+
+export const BLOCKED_DATES = "Blocked dates fetched successfully";

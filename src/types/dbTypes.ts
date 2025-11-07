@@ -8,8 +8,9 @@ import type { User, UserTable } from "../database/schemas/users";
 import { Scene, SceneTable } from "../database/schemas/scenes";
 import { ArtistScene, ArtistSceneTable } from "../database/schemas/artistScenes";
 import db from "../database/db";
+import { LocationTable,Location } from "../database/schemas/location";
 
-export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable | SceneTable | ArtistSceneTable;
+export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable | SceneTable | ArtistSceneTable | LocationTable ;
 
 export type DBRecord<T extends DBTable>
   = T extends UserTable ? User
@@ -18,7 +19,8 @@ export type DBRecord<T extends DBTable>
         : T extends ProjectTable ? Project
           : T extends ArtistProjectTable ? ArtistProject 
             : T extends SceneTable ? Scene 
-              : T extends ArtistSceneTable ? ArtistScene : null;
+              : T extends ArtistSceneTable ? ArtistScene 
+                : T extends LocationTable ? Location : null;
 
 export type DBNewRecord<T extends DBTable> = PgInsertValue<T>;
 

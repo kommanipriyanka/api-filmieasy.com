@@ -3,9 +3,9 @@ import db from "../database/db";
 import { scenes } from "../database/schemas";
 
 
+export class SceneService{
 
-
-export async function getScenes(projectId: number) {
+ getScenes = async(projectId: number)=> {
   return await db.query.scenes.findMany({
     where: eq(scenes.project_id, projectId),
     with: {
@@ -16,6 +16,7 @@ export async function getScenes(projectId: number) {
       }
     }
   });
+}
 }
 
 

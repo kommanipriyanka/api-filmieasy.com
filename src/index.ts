@@ -13,6 +13,8 @@ import { projectRoutes } from "./routes/projectRoutes";
 import { userRoutes } from "./routes/userRoutes";
 import { fileRoutes } from "./routes/fileRoutes";
 import { sceneRoutes } from "./routes/sceneRoutes";
+import { locationRoutes } from "./routes/locationRoutes";
+import { dummyRoutes } from "./routes/dummyRoutes";
 
 const app = new Hono();
 
@@ -29,6 +31,9 @@ app.route("/user", userRoutes);
 app.route("/project", projectRoutes);
 app.route("/file",fileRoutes);
 app.route("/scene",sceneRoutes);
+app.route("/location",locationRoutes)
+
+app.route("/dummy",dummyRoutes)
 
 app.onError((err: any, c: Context) => {
   const statusCode = err.status || 555;

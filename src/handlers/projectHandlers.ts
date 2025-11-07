@@ -10,18 +10,19 @@ import { projects } from "../database/schemas/projects";
 import BadRequestException from "../exceptions/badRequestException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getRecordsCount, getSingleRecordByAColumnValue, saveRecord, saveRecords } from "../services/baseDbServices";
-import {  createProject, getUsers, listProjects } from "../services/projectServices";
+import { getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
+import {  ProjectService } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateProject} from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+const projectService = new ProjectService();
 
 export class ProjectHandler {
   create = factory.createHandlers(async (c: Context) => {
     const user:User= c.get("user_payload");
     const reqData = await c.req.json();
     const validatedReqData = validateRequestBody(vCreateProject, reqData);
-    const project = await createProject(validatedReqData,user.id)
+    const project = await projectService.createProject(validatedReqData,user.id)
     return sendResponse(c, 200, PROJECT_CREATED, project);
   });
 
@@ -33,7 +34,7 @@ export class ProjectHandler {
       throw new BadRequestException(PROJECT_ID_REQUIRED);
     const filters = [eq(artist_projects.project_id, id)];
     const [records, totalRecords] = await Promise.all([
-      getUsers(id, page, limit),
+      projectService.getUsers(id, page, limit),
       getRecordsCount(artist_projects, filters),
     ]);
     const pagination_info = getPaginationData(page, limit, totalRecords);
@@ -54,12 +55,19 @@ export class ProjectHandler {
     const page = Number(c.req.query("page") || 1);
     const limit = Number(c.req.query("pageSize") || 10);
     const searchString=c.req.query("searchString");
-    const {total_records,result} = await listProjects(page,limit,userId,searchString)
+    const {total_records,result} = await projectService.listProjects(page,limit,userId,searchString)
     const pagination_info = getPaginationData(page,limit,total_records)
     const paginatedResponse = {pagination_info,records:result}
     return sendResponse(c,200,PROJECTS_FETCHED,paginatedResponse)
-  })
+  });
 
+
+  
+
+  
+
+
+  
   
 
   

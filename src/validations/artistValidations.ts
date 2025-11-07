@@ -1,7 +1,8 @@
 import * as v from "valibot";
 
-import { DEPARTMENT_ID_REQUIRED, EMAIL_REQUIRED, GENDER_REQUIRED, INVALID_EMAIL, NAME_REQUIRED, PHONE_NO_INVALID, PHONE_NO_REQUIRED, ROLETYPE_REQUIRED } from "../constants/appMessages";
+import { DEPARTMENT_ID_REQUIRED, EMAIL_REQUIRED, GENDER_REQUIRED, INVALID_EMAIL, NAME_REQUIRED, PHONE_NO_INVALID, PHONE_NO_REQUIRED, ROLE_TYPE_REQUIRED } from "../constants/appMessages";
 import { genderEnum, roleTypeEnum } from "../database/schemas/enums";
+import { validateRequestBody } from "./validateRequest";
 
 export const vArtistSchema = v.object({
   email: v.pipe(
@@ -27,10 +28,10 @@ export const vArtistSchema = v.object({
     v.picklist(genderEnum.enumValues, "Invalid gender"),
   ),
   role_type: v.pipe(
-    v.string(ROLETYPE_REQUIRED),
-    v.nonEmpty(ROLETYPE_REQUIRED),
+    v.string(ROLE_TYPE_REQUIRED),
+    v.nonEmpty(ROLE_TYPE_REQUIRED),
     v.picklist(roleTypeEnum.enumValues, "Invalid role type"),
-  ),
+  ),  
   experience: v.optional(v.number()),
   department_id: v.number(DEPARTMENT_ID_REQUIRED),
   DOB: v.optional(
@@ -45,3 +46,36 @@ export const vArtistSchema = v.object({
   address: v.optional(v.string()),
   languages: v.optional(v.array(v.string())),
 });
+
+
+
+
+
+export const validateArtistRows = async (rows: any[]) => {
+  const validationResults = await Promise.all(
+    rows.map(async (row: any, index: number) => {
+      const rowIndex = index + 2;
+
+      try {
+        const validated = validateRequestBody(vArtistSchema, row);
+        return { type: "valid", data: { ...validated, rowIndex } };
+      } 
+      catch (error: any) {
+        return {
+          type: "invalid",
+          data: { rowIndex, reason: error.errors ?? { general: error.message } },
+        };
+      }
+    })
+  );
+
+  const validRows = validationResults
+    .filter((r) => r.type === "valid")
+    .map((r) => r.data);
+
+  const invalidRows = validationResults
+    .filter((r) => r.type === "invalid")
+    .map((r) => r.data);
+
+  return { validRows, invalidRows };
+};
