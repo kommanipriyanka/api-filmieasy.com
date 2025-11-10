@@ -4,5 +4,5 @@ import { LocationHandler } from "../handlers/locationHandlers";
 const locationHandler = new LocationHandler();
 
 export const locationRoutes = factory.createApp();
-locationRoutes.post("/",...locationHandler.createLocation);
-locationRoutes.get("/",...locationHandler.getAllLocations);
+locationRoutes.post("/", ...locationHandler.createLocation);
+locationRoutes.get("/", ...locationHandler.getAllLocations);

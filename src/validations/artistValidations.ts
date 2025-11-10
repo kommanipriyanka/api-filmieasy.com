@@ -31,7 +31,7 @@ export const vArtistSchema = v.object({
     v.string(ROLE_TYPE_REQUIRED),
     v.nonEmpty(ROLE_TYPE_REQUIRED),
     v.picklist(roleTypeEnum.enumValues, "Invalid role type"),
-  ),  
+  ),
   experience: v.optional(v.number()),
   department_id: v.number(DEPARTMENT_ID_REQUIRED),
   DOB: v.optional(
@@ -47,11 +47,7 @@ export const vArtistSchema = v.object({
   languages: v.optional(v.array(v.string())),
 });
 
-
-
-
-
-export const validateArtistRows = async (rows: any[]) => {
+export async function validateArtistRows(rows: any[]) {
   const validationResults = await Promise.all(
     rows.map(async (row: any, index: number) => {
       const rowIndex = index + 2;
@@ -59,23 +55,23 @@ export const validateArtistRows = async (rows: any[]) => {
       try {
         const validated = validateRequestBody(vArtistSchema, row);
         return { type: "valid", data: { ...validated, rowIndex } };
-      } 
+      }
       catch (error: any) {
         return {
           type: "invalid",
           data: { rowIndex, reason: error.errors ?? { general: error.message } },
         };
       }
-    })
+    }),
   );
 
   const validRows = validationResults
-    .filter((r) => r.type === "valid")
-    .map((r) => r.data);
+    .filter(r => r.type === "valid")
+    .map(r => r.data);
 
   const invalidRows = validationResults
-    .filter((r) => r.type === "invalid")
-    .map((r) => r.data);
+    .filter(r => r.type === "invalid")
+    .map(r => r.data);
 
   return { validRows, invalidRows };
-};
+}

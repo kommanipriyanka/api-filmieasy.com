@@ -1,27 +1,23 @@
 import { relations } from "drizzle-orm";
-import { decimal, pgEnum, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+
 import { scenes } from "./scenes";
 
 export const locationTypeEnum = pgEnum("location_type", ["INDOOR", "OUTDOOR"]);
 
+export const location = pgTable("location", {
+  id: serial("id").primaryKey(),
+  name: varchar("name"),
+  type: locationTypeEnum("type"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
 
-export const location = pgTable("location",{
-    id:serial("id").primaryKey(),
-    name:varchar("name"),
-    type:locationTypeEnum("type"),
-    latitude:decimal("latitude"),
-    longitude:decimal("longitude"),
-    created_at:timestamp("created_at").defaultNow(),
-    updated_at:timestamp("updated_at").defaultNow()
-
-    
-    
-})
+});
 
 export type NewLocation = typeof location.$inferInsert;
 export type Location = typeof location.$inferSelect;
 export type LocationTable = typeof location;
 
 export const locationRelations = relations(location, ({ many }) => ({
-  scenes: many(scenes)
+  scenes: many(scenes),
 }));

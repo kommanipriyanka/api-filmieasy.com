@@ -7,12 +7,11 @@ export const vDepartmentSchema = v.object({
     v.string(DEPARTMENT_REQUIRED),
     v.nonEmpty(DEPARTMENT_REQUIRED),
     v.transform((value) => {
-      const trimmed = value.trim().toLowerCase(); 
+      const trimmed = value.trim().toLowerCase();
       return trimmed
         .split(/\s+/)
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" "); 
-    })
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }),
   ),
 });
-

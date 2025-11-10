@@ -47,18 +47,16 @@ export const DEPARTMENTS_FETCHED = "Departments fetched successfully";
 export const ARTISTS_EXISTS = "Artist already exists";
 export const ARTIST_INSERTED = "Artist inserted successfully";
 export const ARTISTS_FETCHED = "Artists fetched successfully";
-export const GENDER_REQUIRED = "Gender is required"
-export const DEPARTMENT_ID_REQUIRED = "Department is required"
-export const ROLE_TYPE_REQUIRED = "Role type is required"
+export const GENDER_REQUIRED = "Gender is required";
+export const DEPARTMENT_ID_REQUIRED = "Department is required";
+export const ROLE_TYPE_REQUIRED = "Role type is required";
 
 export const PROJECT_CREATED = "Project created successfully";
 export const PROJECT_NAME_REQUIRED = "Name is required";
 export const PROJECT_ID_REQUIRED = "Project id is required";
 export const PROJECT_USERS_FETCHED = "Project users fetched successfully";
 export const PROJECT_DETAILS = "Project details fetched successfully";
-export const PROJECTS_FETCHED = "Projects fetched successfully;"
-
-
+export const PROJECTS_FETCHED = "Projects fetched successfully;";
 
 export const UPLOAD_URL = "Upload url generated successfully";
 export const FILE_NAME_REQUIRED = "File name is required";
@@ -70,10 +68,8 @@ export const PROJECT_SCENES_FETCHED = "Project scenes fetched successfully";
 export const SCENE_ID_REQUIRED = "Scene id is required";
 export const SCENE_MEMBERS = "Scene members fetched successfully";
 
-
 export const LOCATION_CREATED = "Location created successfully";
 export const LOCATIONS_FETCHED = "All Locations fetched successfully";
 export const PROJECT_LOCATIONS = "Project locations fetched successfully";
-
 
 export const BLOCKED_DATES = "Blocked dates fetched successfully";

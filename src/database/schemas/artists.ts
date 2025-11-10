@@ -1,10 +1,10 @@
 import { relations } from "drizzle-orm";
-import { date, integer, pgTable, serial, text, timestamp, unique, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { date, integer, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
+import { artist_scenes } from "./artistScenes";
 import { departments } from "./department";
 import { genderEnum, roleTypeEnum } from "./enums";
 import { users } from "./users";
-import { artist_scenes } from "./artistScenes";
 
 export const artists = pgTable("artists", {
   id: serial("id").primaryKey().notNull(),
@@ -21,15 +21,14 @@ export const artists = pgTable("artists", {
   invited_by: integer("invited_by").references(() => users.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-},
-table => [
+}, table => [
   uniqueIndex("validUserIdx").on(table.email, table.invited_by),
 ]);
 export type Artist = typeof artists.$inferSelect;
 export type NewArtist = typeof artists.$inferInsert;
 export type ArtistTable = typeof artists;
 
-export const artistsRelations = relations(artists, ({ one ,many}) => ({
+export const artistsRelations = relations(artists, ({ one, many }) => ({
   department: one(departments, {
     fields: [artists.department_id],
     references: [departments.id],

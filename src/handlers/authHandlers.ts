@@ -1,5 +1,7 @@
 import * as argon2 from "argon2";
+
 import type { UserTable } from "../database/schemas/users";
+
 import { INVALID_PASSWORD, USER_EXISTS, USER_LOGIN, USER_NOT_FOUND, USER_REGISTERED } from "../constants/appMessages";
 import { users } from "../database/schemas/users";
 import BadRequestException from "../exceptions/badRequestException";

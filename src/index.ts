@@ -9,12 +9,12 @@ import { DEF_ERROR_RESP } from "./constants/appMessages";
 import { testConnection } from "./database/db";
 import { authRoutes } from "./routes/authRoutes";
 import { departmentRoutes } from "./routes/departmentRoutes";
-import { projectRoutes } from "./routes/projectRoutes";
-import { userRoutes } from "./routes/userRoutes";
-import { fileRoutes } from "./routes/fileRoutes";
-import { sceneRoutes } from "./routes/sceneRoutes";
-import { locationRoutes } from "./routes/locationRoutes";
 import { dummyRoutes } from "./routes/dummyRoutes";
+import { fileRoutes } from "./routes/fileRoutes";
+import { locationRoutes } from "./routes/locationRoutes";
+import { projectRoutes } from "./routes/projectRoutes";
+import { sceneRoutes } from "./routes/sceneRoutes";
+import { userRoutes } from "./routes/userRoutes";
 
 const app = new Hono();
 
@@ -29,11 +29,11 @@ app.route("/auth", authRoutes);
 app.route("/department", departmentRoutes);
 app.route("/user", userRoutes);
 app.route("/project", projectRoutes);
-app.route("/file",fileRoutes);
-app.route("/scene",sceneRoutes);
-app.route("/location",locationRoutes)
+app.route("/file", fileRoutes);
+app.route("/scene", sceneRoutes);
+app.route("/location", locationRoutes);
 
-app.route("/dummy",dummyRoutes)
+app.route("/dummy", dummyRoutes);
 
 app.onError((err: any, c: Context) => {
   const statusCode = err.status || 555;

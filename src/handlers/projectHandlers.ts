@@ -11,21 +11,14 @@ import BadRequestException from "../exceptions/badRequestException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
 import { getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
-import {  ProjectService } from "../services/projectServices";
+import { ProjectService } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
-import { vCreateProject} from "../validations/projectValidations";
+import { vCreateProjectWithScenes } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+
 const projectService = new ProjectService();
 
 export class ProjectHandler {
-  create = factory.createHandlers(async (c: Context) => {
-    const user:User= c.get("user_payload");
-    const reqData = await c.req.json();
-    const validatedReqData = validateRequestBody(vCreateProject, reqData);
-    const project = await projectService.createProject(validatedReqData,user.id)
-    return sendResponse(c, 200, PROJECT_CREATED, project);
-  });
-
   getProjectUsers = factory.createHandlers(async (c: Context) => {
     const id = +c.req.param("id");
     const page = +(c.req.query("page") || 1);
@@ -42,33 +35,30 @@ export class ProjectHandler {
     return sendResponse(c, 200, PROJECT_USERS_FETCHED, response);
   });
 
-  getProjectDetails = factory.createHandlers(async (c:Context)=>{
+  getProjectDetails = factory.createHandlers(async (c: Context) => {
     const id = +c.req.param("id");
-    if(!id) throw new BadRequestException(PROJECT_ID_REQUIRED)
-    const result = await getSingleRecordByAColumnValue(projects,"id","=",id)
-    return sendResponse(c,200,PROJECT_DETAILS,result)
-  })
+    if (!id)
+      throw new BadRequestException(PROJECT_ID_REQUIRED);
+    const result = await getSingleRecordByAColumnValue(projects, "id", "=", id);
+    return sendResponse(c, 200, PROJECT_DETAILS, result);
+  });
 
-
-  getAllProjects = factory.createHandlers(async (c:Context)=>{
+  getAllProjects = factory.createHandlers(async (c: Context) => {
     const userId = +c.get("user_payload").id;
     const page = Number(c.req.query("page") || 1);
     const limit = Number(c.req.query("pageSize") || 10);
-    const searchString=c.req.query("searchString");
-    const {total_records,result} = await projectService.listProjects(page,limit,userId,searchString)
-    const pagination_info = getPaginationData(page,limit,total_records)
-    const paginatedResponse = {pagination_info,records:result}
-    return sendResponse(c,200,PROJECTS_FETCHED,paginatedResponse)
+    const searchString = c.req.query("searchString");
+    const { total_records, result } = await projectService.listProjects(page, limit, userId, searchString);
+    const pagination_info = getPaginationData(page, limit, total_records);
+    const paginatedResponse = { pagination_info, records: result };
+    return sendResponse(c, 200, PROJECTS_FETCHED, paginatedResponse);
   });
 
-
-  
-
-  
-
-
-  
-  
-
-  
+  createProjectWithScenes = factory.createHandlers(async (c: Context) => {
+    const user: User = c.get("user_payload");
+    const reqData = await c.req.json();
+    const validatedData = validateRequestBody(vCreateProjectWithScenes, reqData);
+    const result = await projectService.createProjectWithScenes(user.id, validatedData);
+    return sendResponse(c, 200, PROJECT_CREATED, result);
+  });
 }

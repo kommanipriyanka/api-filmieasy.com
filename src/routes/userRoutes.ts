@@ -9,5 +9,5 @@ userRoutes.post("/", isAuthorized, ...userHandler.inviteArtists);
 userRoutes.get("/", isAuthorized, ...userHandler.getArtists);
 userRoutes.get("/:id", ...userHandler.getArtist);
 userRoutes.get("/:id/projects", ...userHandler.getArtistProjects);
-userRoutes.post("/artists/import",isAuthorized,...userHandler.importArtists)
-userRoutes.get("/artists/export",isAuthorized,...userHandler.downloadArtists)
+userRoutes.post("/artists/import", isAuthorized, ...userHandler.importArtists);
+userRoutes.get("/artists/export", isAuthorized, ...userHandler.downloadArtists);

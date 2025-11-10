@@ -11,7 +11,6 @@ import { users } from "../database/schemas/users";
 import UnAuthorizedException from "../exceptions/unauthorizedException";
 import { getSingleRecordByMultipleColumnValues } from "../services/baseDbServices";
 
-
 async function genJWTTokens(payload: JWTUserPayload) {
   const now = Math.floor(Date.now() / 1000);
   const access_token_expiry = now + jwtConfig.expires_in;
@@ -20,9 +19,9 @@ async function genJWTTokens(payload: JWTUserPayload) {
   //  const access_token = await sign({ ...payload, exp: access_token_expiry }, jwtConfig.secret);
   //  const refresh_token = await sign({ ...payload, exp: refresh_token_expiry }, jwtConfig.secret);
 
-  const [access_token,refresh_token] = await Promise.all([sign({...payload, exp: access_token_expiry }, jwtConfig.secret),sign({ ...payload, exp: refresh_token_expiry }, jwtConfig.secret)]);
+  const [access_token, refresh_token] = await Promise.all([sign({ ...payload, exp: access_token_expiry }, jwtConfig.secret), sign({ ...payload, exp: refresh_token_expiry }, jwtConfig.secret)]);
 
-   return { access_token, refresh_token };
+  return { access_token, refresh_token };
 }
 
 async function genJWTTokensForUser(userId: number) {

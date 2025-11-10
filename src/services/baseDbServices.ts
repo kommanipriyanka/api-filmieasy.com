@@ -213,7 +213,6 @@ async function saveRecord<T extends DBTable>(
   }
   const client = trx ?? db;
 
-
   const result = await client.insert(table).values(record).returning();
 
   if (!Array.isArray(result) || result.length === 0) {
@@ -226,7 +225,7 @@ async function saveRecord<T extends DBTable>(
 async function saveRecords<T extends DBTable>(
   table: T,
   records: DBNewRecord<T>[],
-  trx?:Transaction,
+  trx?: Transaction,
 ): Promise<DBRecord<T>[]> {
   if (!records) {
     throw new UnprocessableEntityException(EMPTY_DB_DATA);

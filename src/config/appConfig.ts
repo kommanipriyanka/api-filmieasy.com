@@ -1,5 +1,5 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 export const appConfig = {
-  port:Number(process.env.port),
+  port: Number(process.env.port),
 };

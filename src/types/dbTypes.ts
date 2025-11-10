@@ -1,25 +1,25 @@
 import type { PgInsertValue } from "drizzle-orm/pg-core";
 
+import type db from "../database/db";
 import type { ArtistProject, ArtistProjectTable } from "../database/schemas/artistProjects";
 import type { Artist, ArtistTable } from "../database/schemas/artists";
+import type { ArtistScene, ArtistSceneTable } from "../database/schemas/artistScenes";
 import type { Department, DepartmentTable } from "../database/schemas/department";
+import type { Location, LocationTable } from "../database/schemas/location";
 import type { Project, ProjectTable } from "../database/schemas/projects";
+import type { Scene, SceneTable } from "../database/schemas/scenes";
 import type { User, UserTable } from "../database/schemas/users";
-import { Scene, SceneTable } from "../database/schemas/scenes";
-import { ArtistScene, ArtistSceneTable } from "../database/schemas/artistScenes";
-import db from "../database/db";
-import { LocationTable,Location } from "../database/schemas/location";
 
-export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable | SceneTable | ArtistSceneTable | LocationTable ;
+export type DBTable = UserTable | DepartmentTable | ArtistTable | ProjectTable | ArtistProjectTable | SceneTable | ArtistSceneTable | LocationTable;
 
 export type DBRecord<T extends DBTable>
   = T extends UserTable ? User
     : T extends DepartmentTable ? Department
       : T extends ArtistTable ? Artist
         : T extends ProjectTable ? Project
-          : T extends ArtistProjectTable ? ArtistProject 
-            : T extends SceneTable ? Scene 
-              : T extends ArtistSceneTable ? ArtistScene 
+          : T extends ArtistProjectTable ? ArtistProject
+            : T extends SceneTable ? Scene
+              : T extends ArtistSceneTable ? ArtistScene
                 : T extends LocationTable ? Location : null;
 
 export type DBNewRecord<T extends DBTable> = PgInsertValue<T>;
@@ -63,4 +63,3 @@ export interface PaginatedRecords<T extends DBTable> {
 }
 
 export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
