@@ -47,31 +47,3 @@ export const vArtistSchema = v.object({
   languages: v.optional(v.array(v.string())),
 });
 
-export async function validateArtistRows(rows: any[]) {
-  const validationResults = await Promise.all(
-    rows.map(async (row: any, index: number) => {
-      const rowIndex = index + 2;
-
-      try {
-        const validated = validateRequestBody(vArtistSchema, row);
-        return { type: "valid", data: { ...validated, rowIndex } };
-      }
-      catch (error: any) {
-        return {
-          type: "invalid",
-          data: { rowIndex, reason: error.errors ?? { general: error.message } },
-        };
-      }
-    }),
-  );
-
-  const validRows = validationResults
-    .filter(r => r.type === "valid")
-    .map(r => r.data);
-
-  const invalidRows = validationResults
-    .filter(r => r.type === "invalid")
-    .map(r => r.data);
-
-  return { validRows, invalidRows };
-}

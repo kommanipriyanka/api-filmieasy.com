@@ -1,11 +1,17 @@
 import { relations } from "drizzle-orm";
-import { date, integer, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { date, integer, jsonb, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 import { artist_scenes } from "./artistScenes";
 import { departments } from "./department";
 import { genderEnum, roleTypeEnum } from "./enums";
 import { users } from "./users";
 
+
+export interface ArtistAvailability {
+  date: string;
+  status: "Available" | "Unavailable";
+  notes?:string
+}
 export const artists = pgTable("artists", {
   id: serial("id").primaryKey().notNull(),
   full_name: varchar("full_name"),
@@ -19,6 +25,7 @@ export const artists = pgTable("artists", {
   experience: integer("experience"),
   department_id: integer("department_id").references(() => departments.id),
   invited_by: integer("invited_by").references(() => users.id),
+  available_dates: jsonb("available_dates").$type<ArtistAvailability[]>().notNull().default([]),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 }, table => [

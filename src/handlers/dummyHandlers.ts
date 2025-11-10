@@ -23,6 +23,10 @@ export const getDummyArtists = factory.createHandlers(async (c) => {
   const totalItems = 200;
   const baseList = Array.from({ length: totalItems }, (_, i) => {
     const u = users[i % users.length];
+    const gender = i % 2 === 0 ? "men" : "women";
+    const avatarId = i % 99; 
+    const picture = `https://randomuser.me/api/portraits/${gender}/${avatarId}.jpg`;
+
     return {
       id: i + 1,
       full_name: u.name,
@@ -33,6 +37,7 @@ export const getDummyArtists = factory.createHandlers(async (c) => {
       address: `${u.address.street}, ${u.address.city}`,
       charges: charges[i % charges.length],
       status: statuses[i % statuses.length],
+      picture
     };
   });
 
@@ -59,10 +64,14 @@ export const getDummyProjects = factory.createHandlers(async (c) => {
   const budgets = ["1L/50CR", "2L/60CR", "5L/80CR", "10L/90CR", "12L/100CR"];
   const memberCounts = [10, 15, 18, 20, 25, 30];
 
+
   const totalItems = 100;
+  
   const allProjects = Array.from({ length: totalItems }, (_, i) => {
     const p = posts[i % posts.length];
-    return {
+    const picture = `https://picsum.photos/seed/project${i + 1}/600/400`;
+
+   return {
       id: i + 1,
       project_name: p.title.split(" ").slice(0, 3).join(" "),
       description: "Project description here",
@@ -72,6 +81,8 @@ export const getDummyProjects = factory.createHandlers(async (c) => {
       scene: `Scene ${Math.floor(Math.random() * 80) + 1}/80`,
       status: statuses[i % statuses.length],
       address: `${p.id * 10} Elm St, Mumbai`,
+      picture
+     
     };
   });
   const start = (page - 1) * limit;
