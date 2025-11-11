@@ -2,7 +2,32 @@ import * as v from "valibot";
 
 import { DEPARTMENT_ID_REQUIRED, EMAIL_REQUIRED, GENDER_REQUIRED, INVALID_EMAIL, NAME_REQUIRED, PHONE_NO_INVALID, PHONE_NO_REQUIRED, ROLE_TYPE_REQUIRED } from "../constants/appMessages";
 import { genderEnum, roleTypeEnum } from "../database/schemas/enums";
-import { validateRequestBody } from "./validateRequest";
+
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+export const vAvailableDateArray = v.pipe(
+  v.array(
+    v.pipe(
+      v.string(),
+      v.check(val => DATE_REGEX.test(val), "Date must be in YYYY-MM-DD format"),
+      v.check(val => !isNaN(Date.parse(val)), "Invalid date value"),
+    ),
+  ),
+  v.check(arr => arr.length > 0, "At least one date required"),
+  v.transform((arr) => {
+    const normalized = arr.map((date) => {
+      const d = new Date(date);
+      const yyyy = d.getUTCFullYear();
+      const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(d.getUTCDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    });
+
+    const unique = Array.from(new Set(normalized));
+    unique.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    return unique;
+  }),
+);
 
 export const vArtistSchema = v.object({
   email: v.pipe(
@@ -45,5 +70,6 @@ export const vArtistSchema = v.object({
   ),
   address: v.optional(v.string()),
   languages: v.optional(v.array(v.string())),
-});
+  available_dates: v.optional(vAvailableDateArray),
 
+});

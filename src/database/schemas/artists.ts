@@ -6,11 +6,10 @@ import { departments } from "./department";
 import { genderEnum, roleTypeEnum } from "./enums";
 import { users } from "./users";
 
-
 export interface ArtistAvailability {
   date: string;
   status: "Available" | "Unavailable";
-  notes?:string
+  notes?: string;
 }
 export const artists = pgTable("artists", {
   id: serial("id").primaryKey().notNull(),

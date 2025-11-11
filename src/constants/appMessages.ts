@@ -20,12 +20,12 @@ export const DB_UPDATE_DATA_FAILED = "DB update data failed";
 export const USER_REGISTERED = "User registered successfully";
 export const DEPARTMENT_CREATED = "Department created successfully";
 
-export const EMAIL_REQUIRED = "email is required";
-export const INVALID_EMAIL = "email is invalid";
-export const PASSWORD_REQUIRED = "password is required";
-export const PASSWORD_LENGTH = "password must be minimum 8 characters";
-export const PHONE_NO_REQUIRED = "phone number is required";
-export const PHONE_NO_INVALID = "enter valid 10 digit phone number";
+export const EMAIL_REQUIRED = "Email is required";
+export const INVALID_EMAIL = "Email is invalid";
+export const PASSWORD_REQUIRED = "Password is required";
+export const PASSWORD_LENGTH = "Password must be minimum 8 characters";
+export const PHONE_NO_REQUIRED = "Phone number is required";
+export const PHONE_NO_INVALID = "Enter valid 10 digit phone number";
 export const PASSWORD_INVALID = "Password Must contain at least one uppercase, lowercase, number and special character";
 export const NAME_REQUIRED = "Name is required";
 export const USER_NOT_FOUND = "User does not exists with this email";
@@ -56,7 +56,7 @@ export const PROJECT_NAME_REQUIRED = "Name is required";
 export const PROJECT_ID_REQUIRED = "Project id is required";
 export const PROJECT_USERS_FETCHED = "Project users fetched successfully";
 export const PROJECT_DETAILS = "Project details fetched successfully";
-export const PROJECTS_FETCHED = "Projects fetched successfully;";
+export const PROJECTS_FETCHED = "Projects fetched successfully";
 
 export const UPLOAD_URL = "Upload url generated successfully";
 export const FILE_NAME_REQUIRED = "File name is required";

@@ -99,9 +99,8 @@ export const vCreateProjectWithScenes = v.pipe(
 
     start_date: v.optional(v.string()),
     end_date: v.optional(v.string()),
-
+    project_logo: v.optional(v.string()),
     team_members: v.optional(v.array(v.number())),
-
     project_scenes: v.optional(v.array(vScene)),
   }),
   v.check(

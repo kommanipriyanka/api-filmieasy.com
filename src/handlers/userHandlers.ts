@@ -3,7 +3,7 @@ import type { Context } from "hono";
 import { eq, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
 
-import type { ArtistTable, User } from "../database/schemas";
+import type { ArtistAvailability, ArtistTable, User } from "../database/schemas";
 
 import { ARTIST_INSERTED, ARTISTS_EXISTS, ARTISTS_FETCHED, USER_FETCHED, USER_ID_REQUIRED, USER_PROJECTS_FETCHED } from "../constants/appMessages";
 import db from "../database/db";
@@ -25,11 +25,13 @@ export class UserHandler {
     const reqData = await c.req.json();
     const user: User = c.get("user_payload");
     const validatedReqData = validateRequestBody(vArtistSchema, reqData);
+    const { available_dates = [], ...artistData } = validatedReqData;
+    const availableDates: ArtistAvailability[] = available_dates.map((date: string) => ({ date, status: "Available" }));
     const isArtistExists = await getSingleRecordByMultipleColumnValues<ArtistTable>(artists, ["email", "invited_by"], ["=", "="], [validatedReqData.email, user.id]);
     if (isArtistExists) {
       throw new ConflictException(ARTISTS_EXISTS);
     }
-    const artistsData = await saveRecord<ArtistTable>(artists, { ...validatedReqData, invited_by: user.id });
+    const artistsData = await saveRecord<ArtistTable>(artists, { ...artistData, invited_by: user.id, available_dates: availableDates });
     return sendResponse(c, 200, ARTIST_INSERTED, artistsData);
   });
 
