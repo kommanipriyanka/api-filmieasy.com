@@ -38,3 +38,5 @@ export const vCreateScene = v.pipe(
     "End date must be after or equal to Start date",
   ),
 );
+
+export type createScene = v.InferInput<typeof vCreateScene>;

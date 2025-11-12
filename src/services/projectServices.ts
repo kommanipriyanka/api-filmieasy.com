@@ -73,25 +73,39 @@ export class ProjectService {
     return db.transaction(async (trx) => {
       const { project_scenes, ...projectData } = data;
       const project = await saveRecord(projects, { ...projectData, created_by: userId }, trx);
-
       const teamMembers = data.team_members ?? [];
       if (teamMembers.length > 0) {
         const teamRecords = teamMembers.map(id => ({ artist_id: id, project_id: project.id }));
         await saveRecords(artist_projects, teamRecords, trx);
       }
-
       if (Array.isArray(project_scenes) && project_scenes.length > 0) {
         for (const sceneData of project_scenes) {
           const { scene_members, ...sceneFields } = sceneData;
           const scene = await saveRecord<SceneTable>(scenes, { ...sceneFields, project_id: project.id }, trx);
 
+          if (scene_members?.length && sceneFields.start_date) {
+            await userService.markArtistsUnavailableForDate(trx, scene_members, sceneFields.start_date);
+            const startDate = sceneFields.start_date;
+            const callSheetRecords = scene_members.map(id => ({
+              artist_id: id,
+              project_id: project.id,
+              dates: [
+                {
+                  date: startDate,
+                  scene_id: scene.id,
+                  status: "Upcoming" as const,
+                },
+              ],
+            }));
+            await saveRecords<ArtistProjectTable>(artist_projects, callSheetRecords, trx);
+          }
           if (scene_members?.length) {
             const sceneMemberRecords = scene_members.map(id => ({ artist_id: id, scene_id: scene.id }));
+
             await saveRecords(artist_scenes, sceneMemberRecords, trx);
           }
         }
       }
-
       return project;
     });
   };

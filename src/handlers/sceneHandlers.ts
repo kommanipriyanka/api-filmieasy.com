@@ -1,14 +1,10 @@
 import type { Context } from "hono";
 
-import type { ArtistSceneTable, newArtistScene } from "../database/schemas/artistScenes";
-import type { SceneTable } from "../database/schemas/scenes";
-
 import { PROJECT_ID_REQUIRED, PROJECT_SCENES_FETCHED, SCENE_CREATED, SCENE_ID_REQUIRED, SCENE_MEMBERS } from "../constants/appMessages";
-import { artist_scenes } from "../database/schemas/artistScenes";
 import { scenes } from "../database/schemas/scenes";
 import BadRequestException from "../exceptions/badRequestException";
 import factory from "../factory";
-import { getSingleRecordByAColumnValue, saveRecord, saveRecords } from "../services/baseDbServices";
+import { getSingleRecordByAColumnValue } from "../services/baseDbServices";
 import { SceneService } from "../services/sceneServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateScene } from "../validations/sceneValidations";
@@ -23,14 +19,7 @@ export class SceneHandler {
     if (!id)
       throw new BadRequestException(PROJECT_ID_REQUIRED);
     const validatedReqData = validateRequestBody(vCreateScene, reqData);
-    const scene = await saveRecord<SceneTable>(scenes, { ...validatedReqData, project_id: id });
-    if (validatedReqData.scene_members && validatedReqData.scene_members.length > 0) {
-      const records: newArtistScene[] = validatedReqData.scene_members.map((artistId: number) => ({
-        artist_id: artistId,
-        scene_id: scene.id,
-      }));
-      await saveRecords<ArtistSceneTable>(artist_scenes, records);
-    }
+    const scene = await sceneService.create(validatedReqData, id);
     return sendResponse(c, 200, SCENE_CREATED, scene);
   });
 

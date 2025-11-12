@@ -143,4 +143,12 @@ export class UserHandler {
     c.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     return new Response(buffer, { status: 200 });
   });
+
+  getArtistAvailableDatesHandler = factory.createHandlers(async (c: Context) => {
+    const artistId = Number(c.req.param("id"));
+    if (!artistId)
+      throw new BadRequestException("Artist id is required");
+    const dates = await userService.getArtistAvailableDates(artistId);
+    return sendResponse(c, 200, "Artist available dates fetched successfully", dates);
+  });
 }

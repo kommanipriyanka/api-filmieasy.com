@@ -1,0 +1,1 @@
+ALTER TABLE "artist_projects" ADD COLUMN "dates" jsonb DEFAULT '[]'::jsonb NOT NULL;

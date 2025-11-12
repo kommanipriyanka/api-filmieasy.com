@@ -1,4 +1,6 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+
+import type { ArtistAvailability } from "../database/schemas/artists";
 
 import db from "../database/db";
 import { artists } from "../database/schemas/artists";
@@ -67,5 +69,55 @@ export class UserService {
       insertedRecords: inserted.length,
       skippedDuplicates: records.length - inserted.length,
     };
+  };
+
+  getArtistAvailableDates = async (artistId: number) => {
+    const artist = await db.query.artists.findFirst({
+      where: eq(artists.id, artistId),
+      columns: {
+        id: true,
+        available_dates: true,
+      },
+    });
+
+    if (!artist)
+      throw new Error("Artist not found");
+
+    const allDates = (artist.available_dates ?? []) as ArtistAvailability[];
+    const available = allDates.filter(d => d.status === "Available");
+    return { available_dates: available };
+  };
+
+  markArtistsUnavailableForDate = async (
+    trx: any,
+    artistIds: number[],
+    date: string,
+  ) => {
+    const client = trx ?? db;
+    await client
+      .update(artists)
+      .set({
+        available_dates: sql`
+          (
+            SELECT jsonb_agg(
+              CASE
+                WHEN elem->>'date' = ${date} AND elem->>'status' = 'Available'
+                THEN jsonb_set(elem, '{status}', '"Unavailable"', true)
+                ELSE elem
+              END
+            )
+            FROM jsonb_array_elements(${artists.available_dates}) AS elem
+          )
+        `,
+      })
+      .where(inArray(artists.id, artistIds))
+      .where(
+        sql`EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(artists.available_dates) AS e
+          WHERE e->>'date' = ${date} AND e->>'status' = 'Available'
+        )`,
+      )
+      .execute();
   };
 }

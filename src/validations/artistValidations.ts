@@ -10,7 +10,7 @@ export const vAvailableDateArray = v.pipe(
     v.pipe(
       v.string(),
       v.check(val => DATE_REGEX.test(val), "Date must be in YYYY-MM-DD format"),
-      v.check(val => !isNaN(Date.parse(val)), "Invalid date value"),
+      v.check(val => !Number.isNaN(Date.parse(val)), "Invalid date value"),
     ),
   ),
   v.check(arr => arr.length > 0, "At least one date required"),
@@ -68,7 +68,18 @@ export const vArtistSchema = v.object({
       }),
     ),
   ),
-  address: v.optional(v.string()),
+  address: v.optional(
+    v.pipe(
+      v.string(),
+      v.transform((value) => {
+        const parts = value
+          .split(/[,\\n]+/)
+          .map(p => p.trim())
+          .filter(Boolean);
+        return parts.join(", ");
+      }),
+    ),
+  ),
   languages: v.optional(v.array(v.string())),
   available_dates: v.optional(vAvailableDateArray),
 
