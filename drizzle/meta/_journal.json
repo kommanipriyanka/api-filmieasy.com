@@ -120,6 +120,20 @@
       "when": 1762850660365,
       "tag": "0016_clean_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1762928781048,
+      "tag": "0017_thankful_wolverine",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1762936383166,
+      "tag": "0018_tan_vapor",
+      "breakpoints": true
     }
   ]
 }

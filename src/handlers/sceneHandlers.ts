@@ -1,10 +1,13 @@
 import type { Context } from "hono";
 
-import { PROJECT_ID_REQUIRED, PROJECT_SCENES_FETCHED, SCENE_CREATED, SCENE_ID_REQUIRED, SCENE_MEMBERS } from "../constants/appMessages";
+import { eq } from "drizzle-orm";
+
+import { PROJECT_ID_REQUIRED, PROJECT_SCENES_FETCHED, SCENE_CREATED, SCENE_ID_REQUIRED } from "../constants/appMessages";
 import { scenes } from "../database/schemas/scenes";
 import BadRequestException from "../exceptions/badRequestException";
 import factory from "../factory";
-import { getSingleRecordByAColumnValue } from "../services/baseDbServices";
+import { getPaginationData } from "../helpers/paginationHelpers";
+import { getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
 import { SceneService } from "../services/sceneServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateScene } from "../validations/sceneValidations";
@@ -19,7 +22,7 @@ export class SceneHandler {
     if (!id)
       throw new BadRequestException(PROJECT_ID_REQUIRED);
     const validatedReqData = validateRequestBody(vCreateScene, reqData);
-    const scene = await sceneService.create(validatedReqData, id);
+    const scene = await sceneService.createScenes(validatedReqData, id);
     return sendResponse(c, 200, SCENE_CREATED, scene);
   });
 
@@ -35,7 +38,10 @@ export class SceneHandler {
     const projectId = +c.req.param("id");
     if (!projectId)
       throw new BadRequestException(SCENE_ID_REQUIRED);
-    const scene_members = await sceneService.getScenes(projectId);
-    return sendResponse(c, 200, SCENE_MEMBERS, scene_members);
+    const page = +(c.req.query("page") || 1);
+    const limit = +(c.req.query("limit") || 10);
+    const [project_scenes, total_records] = await Promise.all([sceneService.getScenes(projectId, page, limit), getRecordsCount(scenes, [eq(scenes.project_id, projectId)])]);
+    const pagination_info = getPaginationData(page, limit, total_records);
+    return sendResponse(c, 200, PROJECT_SCENES_FETCHED, { pagination_info, project_scenes });
   });
 }

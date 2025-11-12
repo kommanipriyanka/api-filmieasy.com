@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, jsonb, pgTable, serial, timestamp } from "drizzle-orm/pg-core";
+import { integer, jsonb, pgTable, serial, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { artists } from "./artists";
 import { projects } from "./projects";
@@ -18,7 +18,9 @@ export const artist_projects = pgTable("artist_projects", {
   dates: jsonb("dates").$type<CallSheetData[]>().notNull().default([]),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-});
+}, table => ({
+  uniqueProjectArtist: uniqueIndex("unique_project_artist").on(table.project_id, table.artist_id),
+}));
 
 export type ArtistProject = typeof artist_projects.$inferSelect;
 export type NewArtistProject = typeof artist_projects.$inferInsert;

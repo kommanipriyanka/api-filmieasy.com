@@ -1,7 +1,7 @@
-import { and, desc, eq, ilike, inArray } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 
 import type { SceneTable } from "../database/schemas";
-import type { ArtistProjectTable } from "../database/schemas/artistProjects";
+import type { ArtistProjectTable, CallSheetData } from "../database/schemas/artistProjects";
 import type { ProjectTable } from "../database/schemas/projects";
 import type { CreateProject, CreateProjectWithScenes } from "../validations/projectValidations";
 
@@ -11,9 +11,11 @@ import { artist_projects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
 import { projects } from "../database/schemas/projects";
 import { getRecordsCount, saveRecord, saveRecords } from "./baseDbServices";
+import { S3Service } from "./fileServices";
 import { UserService } from "./userServices";
 
 const userService = new UserService();
+const s3Service = new S3Service();
 
 export class ProjectService {
   getUsers = async (projectId: number, page: number, limit: number) => {
@@ -50,7 +52,16 @@ export class ProjectService {
       offset,
       orderBy: desc(projects.created_at),
     });
-    const result = projectsList.map(({ members, ...result }) => ({ ...result, membersCount: members.length }));
+    const result = await Promise.all(
+      projectsList.map(async ({ members, ...proj }) => {
+        const project_logo_url = proj.project_logo ? await s3Service.getPresignedDownloadUrl(proj.project_logo) : null;
+        return {
+          ...proj,
+          project_logo_url,
+          membersCount: members.length,
+        };
+      }),
+    );
     const total_records = await getRecordsCount(projects, [whereCondition]);
     return { total_records, result };
   };
@@ -109,4 +120,23 @@ export class ProjectService {
       return project;
     });
   };
+ upsertArtistProjectDates = async(trx: any,projectId: number,artistId: number,newEntries: CallSheetData[]) =>{
+  const jsonValue = sql`${JSON.stringify(newEntries)}::jsonb`;
+  await trx
+    .insert(artist_projects)
+    .values({
+      project_id: projectId,
+      artist_id: artistId,
+      dates: jsonValue,
+      created_at: new Date(),
+      updated_at: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [artist_projects.project_id, artist_projects.artist_id],
+      set: {
+        dates: sql`${artist_projects.dates} || ${jsonValue}`,
+        updated_at: new Date(),
+      },
+    });
+  }
 }

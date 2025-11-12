@@ -25,6 +25,7 @@ export const artists = pgTable("artists", {
   department_id: integer("department_id").references(() => departments.id),
   invited_by: integer("invited_by").references(() => users.id),
   available_dates: jsonb("available_dates").$type<ArtistAvailability[]>().notNull().default([]),
+  profile_pic: varchar("profile_pic"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
 }, table => [

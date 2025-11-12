@@ -3,7 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { bucketName, s3 } from "../config/s3Config";
 
-export class s3Service {
+export class S3Service {
   getPresignedUploadUrl = async (path: string, contentType: string) => {
     const key = `filmieasy/${path}`;
     const command = new PutObjectCommand({
@@ -17,6 +17,6 @@ export class s3Service {
 
   getPresignedDownloadUrl = (key: string): Promise<string> => {
     const command = new GetObjectCommand({ Bucket: bucketName, Key: key });
-    return getSignedUrl(s3, command, { expiresIn: 900 });
+    return getSignedUrl(s3, command, { expiresIn: 3600 });
   };
 }

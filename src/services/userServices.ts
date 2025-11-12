@@ -1,10 +1,13 @@
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 import type { ArtistAvailability } from "../database/schemas/artists";
 
 import db from "../database/db";
 import { artists } from "../database/schemas/artists";
 import { projects } from "../database/schemas/projects";
+import { S3Service } from "./fileServices";
+
+const s3Service = new S3Service();
 
 export class UserService {
   listArtists = async (page: number, limit: number, filters: any[]) => {
@@ -29,7 +32,7 @@ export class UserService {
   getProjects = async (page: number, limit: number, filters: any[]) => {
     const offset = (page - 1) * limit;
     const whereCondition = and(...filters);
-    const result = await db.query.artist_projects.findMany({
+    const rows = await db.query.artist_projects.findMany({
       offset,
       limit,
       where: whereCondition,
@@ -39,7 +42,20 @@ export class UserService {
       },
     },
     );
-    return result.map(row => row.project);
+    const uniqueById = new Map<number, typeof rows[0]["project"]>();
+    for (const r of rows) {
+      if (r.project && !uniqueById.has(r.project.id))
+        uniqueById.set(r.project.id, r.project);
+    }
+    const uniqueProjects = Array.from(uniqueById.values());
+    const result = await Promise.all(
+      uniqueProjects.map(async (proj) => {
+        const project_logo_url = proj ? proj.project_logo ? await s3Service.getPresignedDownloadUrl(proj.project_logo) : null : null;
+        return { ...proj, project_logo_url };
+      }),
+    );
+
+    return result;
   };
 
   getArtistDetails = async (id: number) => {
@@ -93,31 +109,32 @@ export class UserService {
     artistIds: number[],
     date: string,
   ) => {
+    if (!artistIds.length)
+      return;
+
     const client = trx ?? db;
-    await client
-      .update(artists)
-      .set({
-        available_dates: sql`
-          (
-            SELECT jsonb_agg(
-              CASE
-                WHEN elem->>'date' = ${date} AND elem->>'status' = 'Available'
-                THEN jsonb_set(elem, '{status}', '"Unavailable"', true)
-                ELSE elem
-              END
-            )
-            FROM jsonb_array_elements(${artists.available_dates}) AS elem
-          )
-        `,
-      })
-      .where(inArray(artists.id, artistIds))
-      .where(
-        sql`EXISTS (
-          SELECT 1
-          FROM jsonb_array_elements(artists.available_dates) AS e
-          WHERE e->>'date' = ${date} AND e->>'status' = 'Available'
-        )`,
+
+    const result = await client.execute(sql`
+    UPDATE artists
+    SET available_dates = (
+      SELECT jsonb_agg(
+        CASE
+          WHEN elem->>'date' = ${date} AND elem->>'status' = 'Available'
+          THEN jsonb_set(elem, '{status}', '"Unavailable"', true)
+          ELSE elem
+        END
       )
-      .execute();
+      FROM jsonb_array_elements(available_dates) AS elem
+    )
+    WHERE id = ANY(ARRAY[${sql.join(artistIds.map(id => sql`${id}`), sql`, `)}]::int[])
+      AND EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(available_dates) AS e
+        WHERE e->>'date' = ${date} AND e->>'status' = 'Available'
+      )
+    RETURNING id
+  `);
+
+    const updatedIds = result.rows.map((r: any) => r.id);
   };
 }

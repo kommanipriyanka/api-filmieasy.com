@@ -4,19 +4,22 @@ import { eq } from "drizzle-orm";
 
 import type { User } from "../database/schemas/users";
 
-import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_USERS_FETCHED, PROJECTS_FETCHED } from "../constants/appMessages";
+import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_NOT_FOUND, PROJECT_USERS_FETCHED, PROJECTS_FETCHED } from "../constants/appMessages";
 import { artist_projects } from "../database/schemas/artistProjects";
 import { projects } from "../database/schemas/projects";
 import BadRequestException from "../exceptions/badRequestException";
+import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
 import { getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
+import { S3Service } from "../services/fileServices";
 import { ProjectService } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateProjectWithScenes } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
 
 const projectService = new ProjectService();
+const s3Service = new S3Service();
 
 export class ProjectHandler {
   getProjectUsers = factory.createHandlers(async (c: Context) => {
@@ -39,8 +42,14 @@ export class ProjectHandler {
     const id = +c.req.param("id");
     if (!id)
       throw new BadRequestException(PROJECT_ID_REQUIRED);
-    const result = await getSingleRecordByAColumnValue(projects, "id", "=", id);
-    return sendResponse(c, 200, PROJECT_DETAILS, result);
+    const project = await getSingleRecordByAColumnValue(projects, "id", "=", id);
+    if (!project)
+      throw new NotFoundException(PROJECT_NOT_FOUND);
+    let project_logo_url: string | null = null;
+    if (project.project_logo) {
+      project_logo_url = await s3Service.getPresignedDownloadUrl(project.project_logo);
+    }
+    return sendResponse(c, 200, PROJECT_DETAILS, { project_logo_url, ...project });
   });
 
   getAllProjects = factory.createHandlers(async (c: Context) => {

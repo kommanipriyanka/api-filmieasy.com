@@ -82,5 +82,6 @@ export const vArtistSchema = v.object({
   ),
   languages: v.optional(v.array(v.string())),
   available_dates: v.optional(vAvailableDateArray),
+  profile_pic: v.optional(v.string()),
 
 });

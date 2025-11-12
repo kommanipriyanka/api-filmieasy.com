@@ -57,6 +57,7 @@ export const PROJECT_ID_REQUIRED = "Project id is required";
 export const PROJECT_USERS_FETCHED = "Project users fetched successfully";
 export const PROJECT_DETAILS = "Project details fetched successfully";
 export const PROJECTS_FETCHED = "Projects fetched successfully";
+export const PROJECT_NOT_FOUND = "Project not found";
 
 export const UPLOAD_URL = "Upload url generated successfully";
 export const FILE_NAME_REQUIRED = "File name is required";

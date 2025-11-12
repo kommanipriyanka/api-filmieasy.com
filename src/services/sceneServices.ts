@@ -7,13 +7,18 @@ import db from "../database/db";
 import { artist_projects, artist_scenes, scenes } from "../database/schemas";
 import { saveRecord, saveRecords } from "./baseDbServices";
 import { UserService } from "./userServices";
+import { ProjectService } from "./projectServices";
 
 const userService = new UserService();
+const projectService = new ProjectService()
 
 export class SceneService {
-  getScenes = async (projectId: number) => {
+  getScenes = async (projectId: number, page: number, limit: number) => {
+    const offset = (page - 1) * limit;
     return await db.query.scenes.findMany({
       where: eq(scenes.project_id, projectId),
+      offset,
+      limit,
       with: {
         artistScenes: {
           with: {
@@ -57,7 +62,7 @@ export class SceneService {
   createScenes = async (data: createScene, projectId: number) => {
     return db.transaction(async (trx) => {
       const { scene_members, start_date, end_date, ...sceneFields } = data;
-      const scene = await saveRecord(scenes, { ...sceneFields, project_id: projectId }, trx);
+      const scene = await saveRecord(scenes, { ...sceneFields, start_date, end_date, project_id: projectId }, trx);
       const members = Array.isArray(scene_members) ? scene_members : [];
       if (!members.length)
         return scene;
@@ -71,16 +76,9 @@ export class SceneService {
           dates.push(d.toISOString().slice(0, 10));
         }
         if (dates.length) {
-          for (const date of dates) {
-            await userService.markArtistsUnavailableForDate(trx, members, date);
-          }
-          const scenesPayload = dates.map(date => ({ scene_id: scene.id, date, status: "Upcoming" as const }));
-          const callSheetRows = members.map(artist_id => ({
-            project_id: projectId,
-            artist_id,
-            scenes: scenesPayload,
-          }));
-          await saveRecords(artist_projects, callSheetRows, trx);
+          await Promise.all(dates.map(date => userService.markArtistsUnavailableForDate(trx, members, date)));
+          const scenesPayload = dates.map(date => ({scene_id: scene.id,date,status: 'Upcoming' as const,}));
+          await Promise.all(members.map(artist_id =>projectService.upsertArtistProjectDates(trx, projectId, artist_id, scenesPayload)));
         }
         return scene;
       }
