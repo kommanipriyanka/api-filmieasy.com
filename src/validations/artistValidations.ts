@@ -26,6 +26,7 @@ export const vAvailableDateArray = v.pipe(
     const unique = Array.from(new Set(normalized));
     unique.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     return unique;
+    
   }),
 );
 
@@ -85,3 +86,7 @@ export const vArtistSchema = v.object({
   profile_pic: v.optional(v.string()),
 
 });
+
+
+export const vArtistUpdateSchema = v.partial(vArtistSchema);
+

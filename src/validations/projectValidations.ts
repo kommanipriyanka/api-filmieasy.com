@@ -2,11 +2,10 @@ import * as v from "valibot";
 
 import { PROJECT_NAME_REQUIRED, SCENE_NAME_REQUIRED } from "../constants/appMessages";
 
-export const vCreateProject = v.pipe(
+export const vUpdateProject = v.pipe(
   v.object({
-    name: v.pipe(
+    name: v.optional(v.pipe(
       v.string(PROJECT_NAME_REQUIRED),
-      v.nonEmpty(PROJECT_NAME_REQUIRED),
       v.regex(/^[A-Z0-9 ]+$/i, "Project name can only contain letters, numbers, and spaces."),
       v.transform((value) => {
         return value
@@ -18,14 +17,25 @@ export const vCreateProject = v.pipe(
           )
           .join(" ");
       }),
-    ),
+    )),
     description: v.optional(v.string()),
     genre: v.optional(v.string()),
     languages: v.optional(v.array(v.string())),
     estimated_budget: v.optional(v.number()),
-    start_date: v.optional(v.string()),
-    end_date: v.optional(v.string()),
-    team_members: v.optional(v.array(v.number())),
+    start_date: v.optional(
+      v.pipe(
+        v.string(),
+        v.check(value => isValidDate(value), "Invalid start_date format"),
+        ),
+    ),
+    end_date: v.optional(
+      v.pipe(
+        v.string(),
+        v.check(value => isValidDate(value), "Invalid end_date format"),
+      ),
+    ),
+    team_members_add: v.optional(v.array(v.number())),
+    team_members_remove: v.optional(v.array(v.number())),
     project_logo: v.optional(v.string()),
   }),
   v.check(
@@ -36,6 +46,8 @@ export const vCreateProject = v.pipe(
     "End date must be after start date",
   ),
 );
+
+
 
 const isValidDate = (value: string) => !Number.isNaN(Date.parse(value));
 export const vScene = v.pipe(
@@ -111,5 +123,6 @@ export const vCreateProjectWithScenes = v.pipe(
     "Project end date must be after start date",
   ),
 );
-export type CreateProject = v.InferInput<typeof vCreateProject>;
+
+export type UpdateProject = v.InferInput<typeof vUpdateProject>;
 export type CreateProjectWithScenes = v.InferInput<typeof vCreateProjectWithScenes>;

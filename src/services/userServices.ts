@@ -87,7 +87,7 @@ export class UserService {
     };
   };
 
-  getArtistAvailableDates = async (artistId: number) => {
+  getArtistAvailabilities = async (artistId: number) => {
     const artist = await db.query.artists.findFirst({
       where: eq(artists.id, artistId),
       columns: {
@@ -95,11 +95,7 @@ export class UserService {
         available_dates: true,
       },
     });
-
-    if (!artist)
-      throw new Error("Artist not found");
-
-    const allDates = (artist.available_dates ?? []) as ArtistAvailability[];
+    const allDates = (artist!.available_dates ?? []) as ArtistAvailability[];
     const available = allDates.filter(d => d.status === "Available");
     return { available_dates: available };
   };
@@ -134,7 +130,5 @@ export class UserService {
       )
     RETURNING id
   `);
-
-    const updatedIds = result.rows.map((r: any) => r.id);
   };
 }

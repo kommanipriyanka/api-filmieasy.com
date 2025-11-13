@@ -83,5 +83,5 @@ export class SceneService {
         return scene;
       }
     });
+  }
   };
-}

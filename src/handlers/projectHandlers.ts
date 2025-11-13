@@ -2,20 +2,20 @@ import type { Context } from "hono";
 
 import { eq } from "drizzle-orm";
 
-import type { User } from "../database/schemas/users";
+import { User, users } from "../database/schemas/users";
 
-import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_NOT_FOUND, PROJECT_USERS_FETCHED, PROJECTS_FETCHED } from "../constants/appMessages";
+import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_NOT_FOUND, PROJECT_UPDATED, PROJECT_USERS_FETCHED, PROJECTS_FETCHED, USER_NOT_FOUND } from "../constants/appMessages";
 import { artist_projects } from "../database/schemas/artistProjects";
 import { projects } from "../database/schemas/projects";
 import BadRequestException from "../exceptions/badRequestException";
 import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
+import { getRecordById, getRecordsCount, getSingleRecordByAColumnValue, updateRecordById } from "../services/baseDbServices";
 import { S3Service } from "../services/fileServices";
 import { ProjectService } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
-import { vCreateProjectWithScenes } from "../validations/projectValidations";
+import { vCreateProjectWithScenes, vUpdateProject } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
 
 const projectService = new ProjectService();
@@ -57,6 +57,8 @@ export class ProjectHandler {
     const page = Number(c.req.query("page") || 1);
     const limit = Number(c.req.query("pageSize") || 10);
     const searchString = c.req.query("searchString");
+    const user = await getRecordById(users,userId)
+    if(!user) throw new NotFoundException(USER_NOT_FOUND)
     const { total_records, result } = await projectService.listProjects(page, limit, userId, searchString);
     const pagination_info = getPaginationData(page, limit, total_records);
     const paginatedResponse = { pagination_info, records: result };
@@ -70,4 +72,20 @@ export class ProjectHandler {
     const result = await projectService.createProjectWithScenes(user.id, validatedData);
     return sendResponse(c, 200, PROJECT_CREATED, result);
   });
-}
+
+ updateProject = factory.createHandlers(async (c: Context) => {
+  const projectId = +c.req.param("id");
+  const reqData = await c.req.json();
+  const validatedReqData = validateRequestBody(vUpdateProject, reqData);
+  const { team_members_add, team_members_remove, ...projectData } =validatedReqData;
+  const project = await getRecordById(projects,projectId);
+  if (!project) throw new NotFoundException(PROJECT_NOT_FOUND);
+  const result = await projectService.updateProjectWithTeamMembers(projectId,projectData,team_members_add,team_members_remove);
+  if (result?.error === "HAS_SCENES") {
+    const ids = result.blocked.map((b: any) => b.id).join(", ");
+    throw new BadRequestException(`Cannot remove members assigned to scenes`);
+  }
+  return sendResponse(c, 200, PROJECT_UPDATED, result);
+});
+
+} 

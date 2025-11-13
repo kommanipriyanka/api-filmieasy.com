@@ -238,9 +238,10 @@ async function saveRecords<T extends DBTable>(
   return result as DBRecord<T>[];
 }
 
-async function updateRecordById<T extends DBTable>(table: T, id: number, record: UpdateRecordData<T>): Promise<DBRecord<T>> {
+async function updateRecordById<T extends DBTable>(table: T, id: number, record: UpdateRecordData<T>,trx?:Transaction): Promise<DBRecord<T>> {
   const dataWithTimeStamps = { ...record, updated_at: new Date() };
-  const recordUpdated = await db
+  const client = trx ?? db;
+  const recordUpdated = await client
     .update(table)
     .set(dataWithTimeStamps as any)
     .where(eq(table.id, id))

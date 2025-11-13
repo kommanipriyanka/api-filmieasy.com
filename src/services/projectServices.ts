@@ -3,14 +3,14 @@ import { and, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 import type { SceneTable } from "../database/schemas";
 import type { ArtistProjectTable, CallSheetData } from "../database/schemas/artistProjects";
 import type { ProjectTable } from "../database/schemas/projects";
-import type { CreateProject, CreateProjectWithScenes } from "../validations/projectValidations";
+import type {  CreateProjectWithScenes, UpdateProject } from "../validations/projectValidations";
 
 import db from "../database/db";
 import { artist_scenes, scenes } from "../database/schemas";
 import { artist_projects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
 import { projects } from "../database/schemas/projects";
-import { getRecordsCount, saveRecord, saveRecords } from "./baseDbServices";
+import { deleteRecordsByAColumnValue, getRecordsCount, saveRecord, saveRecords, updateRecordById } from "./baseDbServices";
 import { S3Service } from "./fileServices";
 import { UserService } from "./userServices";
 
@@ -66,19 +66,7 @@ export class ProjectService {
     return { total_records, result };
   };
 
-  createProject = async (data: CreateProject, userId: number) => {
-    return await db.transaction(async (trx) => {
-      const project = await saveRecord<ProjectTable>(projects, { ...data, created_by: userId }, trx);
-      if (data.team_members && data.team_members.length > 0) {
-        const records = data.team_members.map((artistId: number) => ({
-          artist_id: artistId,
-          project_id: project.id,
-        }));
-        await saveRecords<ArtistProjectTable>(artist_projects, records, trx);
-      }
-      return project;
-    });
-  };
+
 
   createProjectWithScenes = async (userId: number, data: CreateProjectWithScenes) => {
     return db.transaction(async (trx) => {
@@ -128,8 +116,6 @@ export class ProjectService {
       project_id: projectId,
       artist_id: artistId,
       dates: jsonValue,
-      created_at: new Date(),
-      updated_at: new Date(),
     })
     .onConflictDoUpdate({
       target: [artist_projects.project_id, artist_projects.artist_id],
@@ -139,4 +125,46 @@ export class ProjectService {
       },
     });
   }
+  getArtistScenes = async (memberId: number,projectId: number,trx: any) => {
+    return trx.query.scenes.findMany({
+      with: {
+        artistScenes: {
+          where: eq(artist_scenes.artist_id, memberId),
+        },
+      },
+      where: eq(scenes.project_id, projectId),
+      });
+   };
+  
+  updateProjectWithTeamMembers = async (projectId:number,projectData:UpdateProject,team_members_add?:number[],team_members_remove?:number[]) => {
+     return db.transaction(async (trx) => {
+      if (Array.isArray(team_members_remove) && team_members_remove.length > 0) {
+        const checks = await Promise.all(
+          team_members_remove.map(async (id) => {
+            const scenes = await this.getArtistScenes(id, projectId, trx);
+            return { id, scenes };
+        })
+      );
+        const blocked = checks.filter((c) => c.scenes.length > 0);
+        if (blocked.length > 0) {
+          return { error: "HAS_SCENES", blocked };
+        }
+        await Promise.all(
+         team_members_remove.map((id) =>
+          deleteRecordsByAColumnValue(artist_projects,"artist_id",id)
+         )
+       );
+     }
+     if (Array.isArray(team_members_add) && team_members_add.length > 0) {
+       
+        const rowsToInsert = team_members_add.map((id) => ({
+        project_id: projectId,
+        artist_id: id,
+      }));
+       await saveRecords(artist_projects, rowsToInsert, trx);
+     }
+     await updateRecordById(projects,projectId, projectData, trx);
+  });
+};
+
 }

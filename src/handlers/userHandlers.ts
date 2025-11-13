@@ -5,18 +5,19 @@ import * as xlsx from "xlsx";
 
 import type { ArtistAvailability, ArtistTable, User } from "../database/schemas";
 
-import { ARTIST_INSERTED, ARTISTS_EXISTS, ARTISTS_FETCHED, USER_FETCHED, USER_ID_REQUIRED, USER_PROJECTS_FETCHED } from "../constants/appMessages";
+import { ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
 import db from "../database/db";
-import { artist_projects, artists } from "../database/schemas";
+import { artist_projects, artists, departments } from "../database/schemas";
 import BadRequestException from "../exceptions/badRequestException";
 import ConflictException from "../exceptions/conflictException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getMultipleRecordsByAColumnValue, getRecordsCount, getSingleRecordByMultipleColumnValues, saveRecord } from "../services/baseDbServices";
+import { getMultipleRecordsByAColumnValue, getRecordById, getRecordsCount, getSingleRecordByMultipleColumnValues, saveRecord, updateRecordByColumnValue, updateRecordById } from "../services/baseDbServices";
 import { UserService } from "../services/userServices";
 import { sendResponse } from "../utils/sendResponse";
-import { vArtistSchema } from "../validations/artistValidations";
+import { vArtistSchema, vArtistUpdateSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+import NotFoundException from "../exceptions/notFoundException";
 
 const userService = new UserService();
 
@@ -25,12 +26,12 @@ export class UserHandler {
     const reqData = await c.req.json();
     const user: User = c.get("user_payload");
     const validatedReqData = validateRequestBody(vArtistSchema, reqData);
-    const { available_dates = [], ...artistData } = validatedReqData;
-    const availableDates: ArtistAvailability[] = available_dates.map((date: string) => ({ date, status: "Available" }));
     const isArtistExists = await getSingleRecordByMultipleColumnValues<ArtistTable>(artists, ["email", "invited_by"], ["=", "="], [validatedReqData.email, user.id]);
     if (isArtistExists) {
       throw new ConflictException(ARTISTS_EXISTS);
     }
+    const { available_dates = [], ...artistData } = validatedReqData;
+    const availableDates: ArtistAvailability[] = available_dates.map((date) => ({ date, status: "Available" }));
     const artistsData = await saveRecord<ArtistTable>(artists, { ...artistData, invited_by: user.id, available_dates: availableDates });
     return sendResponse(c, 200, ARTIST_INSERTED, artistsData);
   });
@@ -41,9 +42,13 @@ export class UserHandler {
     const limit = +query.pageSize || 10;
     const user: User = c.get("user_payload");
     const searchString = query.searchString?.trim();
+    const departmentId = +query.departmentId;
     const filters = [eq(artists.invited_by, user.id)];
     if (searchString) {
       filters.push(ilike(artists.full_name, `%${searchString}%`));
+    }
+    if(departmentId){
+      filters.push(eq(departments.id,departmentId))
     }
     const [allArtists, totalRecords] = await Promise.all([
       userService.listArtists(page, limit, filters),
@@ -84,6 +89,26 @@ export class UserHandler {
     const result = await getMultipleRecordsByAColumnValue(artists, "invited_by", "=", user.id, ["id", "full_name"]);
     return sendResponse(c, 200, ARTISTS_FETCHED, result);
   });
+  updateArtist = factory.createHandlers(async (c:Context)=>{
+    const artistId = +c.req.param("id");
+    const reqData = await c.req.json();
+    const validatedReqData = validateRequestBody(vArtistUpdateSchema,reqData)
+    let {available_dates,...artistData} = validatedReqData
+    const payload = {...artistData,
+      ...(Array.isArray(available_dates) && available_dates.length > 0
+      ? {
+          available_dates: available_dates.map((date: string) => ({
+            date,
+            status: "Available",
+          })) as ArtistAvailability[],
+        }
+      : {}),
+     };
+    const isArtistExists = await getRecordById(artists,artistId)
+    if(!isArtistExists) throw new NotFoundException(USER_NOT_FOUND)
+    const artist = await updateRecordById(artists,artistId,payload)
+    return sendResponse(c,200,USER_UPDATED,artist)
+})
 
   importArtists = factory.createHandlers(async (c: Context) => {
     const body = await c.req.parseBody();
@@ -144,11 +169,16 @@ export class UserHandler {
     return new Response(buffer, { status: 200 });
   });
 
-  getArtistAvailableDatesHandler = factory.createHandlers(async (c: Context) => {
+  getArtistAvailableDates = factory.createHandlers(async (c: Context) => {
     const artistId = Number(c.req.param("id"));
     if (!artistId)
       throw new BadRequestException("Artist id is required");
-    const dates = await userService.getArtistAvailableDates(artistId);
+    const artist = await getRecordById(artists,artistId)
+    if(!artist) throw new NotFoundException(ARTIST_NOT_FOUND)
+    const dates = await userService.getArtistAvailabilities(artistId);
     return sendResponse(c, 200, "Artist available dates fetched successfully", dates);
   });
+
+
+  
 }

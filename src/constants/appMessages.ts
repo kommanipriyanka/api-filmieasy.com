@@ -39,6 +39,7 @@ export const USER_LOGIN = "Login successfully";
 export const USER_FETCHED = "User details fetched successfully";
 export const USER_ID_REQUIRED = "User id is required";
 export const USER_PROJECTS_FETCHED = "User projects fetched successfully";
+export const USER_UPDATED = "User updated successfully";
 
 export const DEPARTMENT_REQUIRED = "Department name is required";
 export const DEPARTMENT_EXISTS = "Department already exists";
@@ -50,6 +51,7 @@ export const ARTISTS_FETCHED = "Artists fetched successfully";
 export const GENDER_REQUIRED = "Gender is required";
 export const DEPARTMENT_ID_REQUIRED = "Department is required";
 export const ROLE_TYPE_REQUIRED = "Role type is required";
+export const ARTIST_NOT_FOUND = "Artist not found";
 
 export const PROJECT_CREATED = "Project created successfully";
 export const PROJECT_NAME_REQUIRED = "Name is required";
@@ -58,6 +60,7 @@ export const PROJECT_USERS_FETCHED = "Project users fetched successfully";
 export const PROJECT_DETAILS = "Project details fetched successfully";
 export const PROJECTS_FETCHED = "Projects fetched successfully";
 export const PROJECT_NOT_FOUND = "Project not found";
+export const PROJECT_UPDATED = "Project updated successfully";
 
 export const UPLOAD_URL = "Upload url generated successfully";
 export const FILE_NAME_REQUIRED = "File name is required";
