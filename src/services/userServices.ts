@@ -23,17 +23,21 @@ export const listArtists = async (page: number, limit: number, filters: any[]) =
       },
     },
   });
-
-  return allArtists.map(artist => ({
-    ...artist,
-    DOB: artist.DOB
-      ? new Date(artist.DOB).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })
-      : null,
-  }));
+  return Promise.all(
+    allArtists.map(async (artist) => ({
+      ...artist,
+      DOB: artist.DOB
+        ? new Date(artist.DOB).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        : null,
+      user_logo_url: artist.profile_pic
+        ? await s3Service.getPresignedDownloadUrl(artist.profile_pic)
+        : null,
+    }))
+  );
 };
 
 

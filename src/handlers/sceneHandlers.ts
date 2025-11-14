@@ -47,8 +47,7 @@ export class SceneHandler {
  
  
   deleteScene = factory.createHandlers(async (c: Context) => {
-    const body = await c.req.json();
-    const sceneId = typeof body === "number" ? body : body?.id;
+    const sceneId = +c.req.param("id")
     if (!sceneId) throw new BadRequestException("scene id required");
     const scene = await getRecordById(scenes,sceneId)
     if(!scene) throw new BadRequestException(SCENE_NOT_FOUND)
@@ -57,10 +56,6 @@ export class SceneHandler {
 });
 
 
-  removeUserFromScene = factory.createHandlers(async (c:Context)=>{
-    const userId = await c.req.json();
-      
-  })
-
+  
 
 }

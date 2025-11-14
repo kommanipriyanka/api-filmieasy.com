@@ -43,7 +43,7 @@ export class UserHandler {
       filters.push(ilike(artists.full_name, `%${searchString}%`));
     }
     if(departmentId){
-      filters.push(eq(departments.id,departmentId))
+      filters.push(eq(artists.department_id,departmentId))
     }
     const [allArtists, totalRecords] = await Promise.all([
       listArtists(page, limit, filters),
