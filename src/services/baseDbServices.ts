@@ -258,9 +258,10 @@ async function deleteRecordById<T extends DBTable>(table: T, id: number) {
   return deletedRecord[0] as DBRecord<T>;
 }
 
-async function deleteRecordsByAColumnValue<T extends DBTable, C extends keyof DBRecord<T>>(table: T, column: C, value: any): Promise<DBRecord<T>> {
+async function deleteRecordsByAColumnValue<T extends DBTable, C extends keyof DBRecord<T>>(table: T, column: C, value: any,trx?:Transaction): Promise<DBRecord<T>> {
   const columnInfo = sql.raw(`${getTableName(table)}.${column as string}`);
-  const deletedRecord = await db.delete(table).where(eq(columnInfo, value)).returning();
+  const client = trx ?? db;
+  const deletedRecord = await client.delete(table).where(eq(columnInfo, value)).returning();
   return deletedRecord[0] as DBRecord<T>;
 }
 

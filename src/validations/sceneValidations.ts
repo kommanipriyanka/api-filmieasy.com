@@ -13,7 +13,7 @@ export const vCreateScene = v.pipe(
 
     description: v.optional(v.string()),
     scene_members: v.optional(v.array(v.number())),
-    scene_path: v.optional(v.string()),
+    script_path: v.optional(v.string()),
 
     start_date: v.optional(
       v.pipe(

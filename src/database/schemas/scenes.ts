@@ -16,6 +16,7 @@ export const scenes = pgTable("scenes", {
   location_id: integer("location_id").references(() => location.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+  deleted_at: timestamp("deleted_at")
 
 });
 
@@ -23,7 +24,7 @@ export type Scene = typeof scenes.$inferSelect;
 export type NewScene = typeof scenes.$inferInsert;
 export type SceneTable = typeof scenes;
 
-export const scenesRelations = relations(scenes, ({ many, one }) => ({
-  artistScenes: many(artist_scenes),
-  location: one(location),
+export const scenesRelations = relations(scenes, ({ many }) => ({
+  artistScenes: many(artist_scenes)
+ 
 }));

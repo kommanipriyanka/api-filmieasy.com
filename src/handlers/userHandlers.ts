@@ -1,25 +1,20 @@
 import type { Context } from "hono";
-
 import { eq, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
-
-import type { ArtistAvailability, ArtistTable, User } from "../database/schemas";
-
 import { ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
 import db from "../database/db";
-import { artist_projects, artists, departments } from "../database/schemas";
+import { artist_projects, ArtistAvailability, artists, ArtistTable, departments, User } from "../database/schemas";
 import BadRequestException from "../exceptions/badRequestException";
 import ConflictException from "../exceptions/conflictException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getMultipleRecordsByAColumnValue, getRecordById, getRecordsCount, getSingleRecordByMultipleColumnValues, saveRecord, updateRecordByColumnValue, updateRecordById } from "../services/baseDbServices";
-import { UserService } from "../services/userServices";
+import { getMultipleRecordsByAColumnValue, getRecordById, getRecordsCount, getSingleRecordByMultipleColumnValues, saveRecord, softDeleteRecordById, updateRecordByColumnValue, updateRecordById } from "../services/baseDbServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vArtistSchema, vArtistUpdateSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
 import NotFoundException from "../exceptions/notFoundException";
+import { getArtistAvailabilities, getArtistDetails, getProjects, importArtistsService, listArtists } from "../services/userServices";
 
-const userService = new UserService();
 
 export class UserHandler {
   inviteArtists = factory.createHandlers(async (c: Context) => {
@@ -51,7 +46,7 @@ export class UserHandler {
       filters.push(eq(departments.id,departmentId))
     }
     const [allArtists, totalRecords] = await Promise.all([
-      userService.listArtists(page, limit, filters),
+      listArtists(page, limit, filters),
       getRecordsCount(artists, filters),
     ]);
     const pagination_info = getPaginationData(page, limit, totalRecords);
@@ -68,7 +63,7 @@ export class UserHandler {
     const filters = [eq(artist_projects.artist_id, id)];
 
     const [records, totalRecords] = await Promise.all([
-      userService.getProjects(page, limit, filters),
+      getProjects(page, limit, filters),
       getRecordsCount(artist_projects, filters),
     ]);
     const pagination_info = getPaginationData(page, limit, totalRecords);
@@ -80,10 +75,9 @@ export class UserHandler {
     const id = +c.req.param("id");
     if (!id)
       throw new BadRequestException(USER_ID_REQUIRED);
-    const user = await userService.getArtistDetails(id);
+    const user = await getArtistDetails(id);
     return sendResponse(c, 200, USER_FETCHED, user);
   });
-
   getArtistsDropdown = factory.createHandlers(async (c: Context) => {
     const user: User = c.get("user_payload");
     const result = await getMultipleRecordsByAColumnValue(artists, "invited_by", "=", user.id, ["id", "full_name"]);
@@ -140,7 +134,7 @@ export class UserHandler {
     if (records.length === 0) {
       return sendResponse(c, 400, "No valid data found in Excel file");
     }
-    const result = await userService.importArtistsService(records);
+    const result = await importArtistsService(records);
     return sendResponse(c, 200, "Excel records imported successfully", {
       insertedCount: result.insertedRecords,
       skippedCount: result.skippedDuplicates,
@@ -175,9 +169,18 @@ export class UserHandler {
       throw new BadRequestException("Artist id is required");
     const artist = await getRecordById(artists,artistId)
     if(!artist) throw new NotFoundException(ARTIST_NOT_FOUND)
-    const dates = await userService.getArtistAvailabilities(artistId);
+    const dates = await getArtistAvailabilities(artistId);
     return sendResponse(c, 200, "Artist available dates fetched successfully", dates);
   });
+
+  deleteArtist = factory.createHandlers(async (c:Context)=>{
+    const artistId = +c.req.param("id")
+    const projects = await getMultipleRecordsByAColumnValue(artist_projects,"artist_id","=",artistId)
+    if(projects){
+      throw new BadRequestException("Cannot delete artist who is a member of project")
+    }
+    await softDeleteRecordById(artists,artistId,{deleted_at:null})
+  })
 
 
   

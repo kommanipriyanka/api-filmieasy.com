@@ -11,14 +11,14 @@ import BadRequestException from "../exceptions/badRequestException";
 import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getRecordById, getRecordsCount, getSingleRecordByAColumnValue, updateRecordById } from "../services/baseDbServices";
+import {  getMultipleRecordsByMultipleColumnValues, getRecordById, getRecordsCount, getSingleRecordByAColumnValue, updateRecordById } from "../services/baseDbServices";
 import { S3Service } from "../services/fileServices";
-import { ProjectService } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateProjectWithScenes, vUpdateProject } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+import { scenes } from "../database/schemas/scenes";
+import { createProjectWithScenes, getUsers, listProjects, updateProjectWithTeamMembers } from "../services/projectServices";
 
-const projectService = new ProjectService();
 const s3Service = new S3Service();
 
 export class ProjectHandler {
@@ -30,7 +30,7 @@ export class ProjectHandler {
       throw new BadRequestException(PROJECT_ID_REQUIRED);
     const filters = [eq(artist_projects.project_id, id)];
     const [records, totalRecords] = await Promise.all([
-      projectService.getUsers(id, page, limit),
+      getUsers(id, page, limit),
       getRecordsCount(artist_projects, filters),
     ]);
     const pagination_info = getPaginationData(page, limit, totalRecords);
@@ -59,7 +59,7 @@ export class ProjectHandler {
     const searchString = c.req.query("searchString");
     const user = await getRecordById(users,userId)
     if(!user) throw new NotFoundException(USER_NOT_FOUND)
-    const { total_records, result } = await projectService.listProjects(page, limit, userId, searchString);
+    const { total_records, result } = await listProjects(page, limit, userId, searchString);
     const pagination_info = getPaginationData(page, limit, total_records);
     const paginatedResponse = { pagination_info, records: result };
     return sendResponse(c, 200, PROJECTS_FETCHED, paginatedResponse);
@@ -69,7 +69,7 @@ export class ProjectHandler {
     const user: User = c.get("user_payload");
     const reqData = await c.req.json();
     const validatedData = validateRequestBody(vCreateProjectWithScenes, reqData);
-    const result = await projectService.createProjectWithScenes(user.id, validatedData);
+    const result = await createProjectWithScenes(user.id, validatedData);
     return sendResponse(c, 200, PROJECT_CREATED, result);
   });
 
@@ -80,12 +80,12 @@ export class ProjectHandler {
   const { team_members_add, team_members_remove, ...projectData } =validatedReqData;
   const project = await getRecordById(projects,projectId);
   if (!project) throw new NotFoundException(PROJECT_NOT_FOUND);
-  const result = await projectService.updateProjectWithTeamMembers(projectId,projectData,team_members_add,team_members_remove);
+  const result = await updateProjectWithTeamMembers(projectId,projectData,team_members_add,team_members_remove);
   if (result?.error === "HAS_SCENES") {
-    const ids = result.blocked.map((b: any) => b.id).join(", ");
     throw new BadRequestException(`Cannot remove members assigned to scenes`);
   }
   return sendResponse(c, 200, PROJECT_UPDATED, result);
 });
+
 
 } 

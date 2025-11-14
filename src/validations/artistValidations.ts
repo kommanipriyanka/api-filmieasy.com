@@ -60,26 +60,34 @@ export const vArtistSchema = v.object({
   ),
   experience: v.optional(v.number()),
   department_id: v.number(DEPARTMENT_ID_REQUIRED),
-  DOB: v.optional(
+    DOB: v.optional(
     v.pipe(
       v.string(),
-      v.transform((value) => {
-        const [day, month, year] = value.split("-");
-        return `${year}-${month}-${day}`;
-      }),
-    ),
+      v.transform((raw) => {
+        const s = String(raw ?? "").trim();
+        if (s === "") return undefined;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        const dmy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(s);
+        if (dmy) {
+          const [, dd, mm, yyyy] = dmy;
+          return `${yyyy}-${mm}-${dd}`;
+        }
+       
+        return undefined;
+      })
+    )
   ),
   address: v.optional(
     v.pipe(
-      v.string(),
-      v.transform((value) => {
-        const parts = value
-          .split(/[,\\n]+/)
-          .map(p => p.trim())
-          .filter(Boolean);
-        return parts.join(", ");
-      }),
-    ),
+      v.union([v.string(), v.array(v.string())]),
+      v.transform((val) => {
+        const parts = Array.isArray(val)
+          ? val
+          : String(val ?? "").split(/[,\r\n]+/);
+        const joined = parts.map((p) => String(p).trim()).filter(Boolean).join(", ");
+        return joined === "" ? undefined : joined;
+      })
+    )
   ),
   languages: v.optional(v.array(v.string())),
   available_dates: v.optional(vAvailableDateArray),

@@ -10,6 +10,8 @@ export const artist_scenes = pgTable("artist_scenes", {
   scene_id: integer("scene_id").references(() => scenes.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+  deleted_at: timestamp("deleted_at")
+
 });
 
 export type ArtistScene = typeof artist_scenes.$inferSelect;

@@ -71,6 +71,7 @@ export const SCENE_NAME_REQUIRED = "Scene name is required";
 export const PROJECT_SCENES_FETCHED = "Project scenes fetched successfully";
 export const SCENE_ID_REQUIRED = "Scene id is required";
 export const SCENE_MEMBERS = "Scene members fetched successfully";
+export const SCENE_NOT_FOUND = "Scene not found";
 
 export const LOCATION_CREATED = "Location created successfully";
 export const LOCATIONS_FETCHED = "All Locations fetched successfully";

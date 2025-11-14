@@ -28,6 +28,8 @@ export const artists = pgTable("artists", {
   profile_pic: varchar("profile_pic"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+  deleted_at: timestamp("deleted_at")
+
 }, table => [
   uniqueIndex("validUserIdx").on(table.email, table.invited_by),
 ]);

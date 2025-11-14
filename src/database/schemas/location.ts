@@ -11,6 +11,8 @@ export const location = pgTable("location", {
   type: locationTypeEnum("type"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
+  deleted_at: timestamp("deleted_at")
+
 
 });
 
@@ -18,6 +20,3 @@ export type NewLocation = typeof location.$inferInsert;
 export type Location = typeof location.$inferSelect;
 export type LocationTable = typeof location;
 
-export const locationRelations = relations(location, ({ many }) => ({
-  scenes: many(scenes),
-}));

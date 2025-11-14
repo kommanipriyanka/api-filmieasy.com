@@ -9,7 +9,6 @@ import { DEF_ERROR_RESP } from "./constants/appMessages";
 import { testConnection } from "./database/db";
 import { authRoutes } from "./routes/authRoutes";
 import { departmentRoutes } from "./routes/departmentRoutes";
-import { dummyRoutes } from "./routes/dummyRoutes";
 import { fileRoutes } from "./routes/fileRoutes";
 import { locationRoutes } from "./routes/locationRoutes";
 import { projectRoutes } from "./routes/projectRoutes";
@@ -31,7 +30,6 @@ app.route("/project", projectRoutes);
 app.route("/file", fileRoutes);
 app.route("/location", locationRoutes);
 
-app.route("/dummy", dummyRoutes);
 
 app.onError((err: any, c: Context) => {
   const statusCode = err.status || 555;

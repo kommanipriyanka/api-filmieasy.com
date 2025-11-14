@@ -18,9 +18,11 @@ export const artist_projects = pgTable("artist_projects", {
   dates: jsonb("dates").$type<CallSheetData[]>().notNull().default([]),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-}, table => ({
-  uniqueProjectArtist: uniqueIndex("unique_project_artist").on(table.project_id, table.artist_id),
-}));
+  deleted_at: timestamp("deleted_at")
+
+}, table => [
+  uniqueIndex("unique_project_artist").on(table.project_id, table.artist_id),
+]);
 
 export type ArtistProject = typeof artist_projects.$inferSelect;
 export type NewArtistProject = typeof artist_projects.$inferInsert;
