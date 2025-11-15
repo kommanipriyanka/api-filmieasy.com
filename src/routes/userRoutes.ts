@@ -12,4 +12,4 @@ userRoutes.get("/:id/projects", ...userHandler.getArtistProjects);
 userRoutes.post("/artists/import", isAuthorized, ...userHandler.importArtists);
 userRoutes.get("/artists/export", isAuthorized, ...userHandler.downloadArtists);
 userRoutes.get("/:id/available-dates", ...userHandler.getArtistAvailableDates);
-userRoutes.put("/:id",...userHandler.updateArtist)
+userRoutes.put("/:id", ...userHandler.updateArtist);

@@ -1,8 +1,8 @@
 export function getPaginationData(page: number, pageSize: number, totalRecords: number) {
-  const limit = pageSize ? +pageSize : 10;
+  const limit = pageSize || 10;
   const totalPages = Math.ceil(totalRecords / limit);
   return {
-    total_records: Number(totalRecords),
+    total_records: totalRecords,
     total_pages: totalPages,
     page_size: limit,
     current_page: page,

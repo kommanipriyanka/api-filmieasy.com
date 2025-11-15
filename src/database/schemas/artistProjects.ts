@@ -18,7 +18,7 @@ export const artist_projects = pgTable("artist_projects", {
   dates: jsonb("dates").$type<CallSheetData[]>().notNull().default([]),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-  deleted_at: timestamp("deleted_at")
+  deleted_at: timestamp("deleted_at"),
 
 }, table => [
   uniqueIndex("unique_project_artist").on(table.project_id, table.artist_id),

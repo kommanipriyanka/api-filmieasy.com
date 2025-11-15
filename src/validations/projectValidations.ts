@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
 import { PROJECT_NAME_REQUIRED, SCENE_NAME_REQUIRED } from "../constants/appMessages";
+const isValidDate = (value: string) => !Number.isNaN(Date.parse(value));
 
 export const vUpdateProject = v.pipe(
   v.object({
@@ -26,7 +27,7 @@ export const vUpdateProject = v.pipe(
       v.pipe(
         v.string(),
         v.check(value => isValidDate(value), "Invalid start_date format"),
-        ),
+      ),
     ),
     end_date: v.optional(
       v.pipe(
@@ -47,9 +48,6 @@ export const vUpdateProject = v.pipe(
   ),
 );
 
-
-
-const isValidDate = (value: string) => !Number.isNaN(Date.parse(value));
 export const vScene = v.pipe(
   v.object({
     name: v.pipe(

@@ -13,4 +13,4 @@ projectRoutes.get("/:id", ...projectHandler.getProjectDetails);
 projectRoutes.post("/:id/scene", ...sceneHandler.createScene);
 projectRoutes.get("/:id/scenes", ...sceneHandler.getAllScenes);
 projectRoutes.post("/", isAuthorized, ...projectHandler.createProjectWithScenes);
-projectRoutes.put("/:id",...projectHandler.updateProject)
+projectRoutes.put("/:id", ...projectHandler.updateProject);

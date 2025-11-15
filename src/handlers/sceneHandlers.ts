@@ -7,12 +7,11 @@ import { scenes } from "../database/schemas/scenes";
 import BadRequestException from "../exceptions/badRequestException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import {  getRecordById, getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
+import { getRecordById, getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
+import { createScenes, deleteScene, getScenes } from "../services/sceneServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateScene } from "../validations/sceneValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-import { createScenes, deleteScene, getScenes } from "../services/sceneServices";
-
 
 export class SceneHandler {
   createScene = factory.createHandlers(async (c: Context) => {
@@ -40,22 +39,19 @@ export class SceneHandler {
     const page = +(c.req.query("page") || 1);
     const limit = +(c.req.query("limit") || 10);
     const [project_scenes, total_records] = await Promise.all([getScenes(projectId, page, limit), getRecordsCount(scenes, [eq(scenes.project_id, projectId)])]);
-    
+
     const pagination_info = getPaginationData(page, limit, total_records);
     return sendResponse(c, 200, PROJECT_SCENES_FETCHED, { pagination_info, project_scenes });
   });
- 
- 
+
   deleteScene = factory.createHandlers(async (c: Context) => {
-    const sceneId = +c.req.param("id")
-    if (!sceneId) throw new BadRequestException("scene id required");
-    const scene = await getRecordById(scenes,sceneId)
-    if(!scene) throw new BadRequestException(SCENE_NOT_FOUND)
+    const sceneId = +c.req.param("id");
+    if (!sceneId)
+      throw new BadRequestException("scene id required");
+    const scene = await getRecordById(scenes, sceneId);
+    if (!scene)
+      throw new BadRequestException(SCENE_NOT_FOUND);
     const result = await deleteScene(scene);
     return sendResponse(c, 200, "SCENE_DELETED", result);
-});
-
-
-  
-
+  });
 }

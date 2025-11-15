@@ -30,7 +30,6 @@ app.route("/project", projectRoutes);
 app.route("/file", fileRoutes);
 app.route("/location", locationRoutes);
 
-
 app.onError((err: any, c: Context) => {
   const statusCode = err.status || 555;
   const errorMessage = err.message || DEF_ERROR_RESP;

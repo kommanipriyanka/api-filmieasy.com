@@ -19,8 +19,7 @@ export const projects = pgTable("projects", {
   created_by: integer("created_by").references(() => users.id),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-  deleted_at: timestamp("deleted_at")
-
+  deleted_at: timestamp("deleted_at"),
 
 });
 

@@ -1,19 +1,20 @@
 import type { Context } from "hono";
 import { eq, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
-import { ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
+import type { ArtistAvailability, ArtistTable, User } from "../database/schemas";
+import { ARTIST_ID_REQUIRED, ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, AVAILABLE_DATES, CANNOT_DELETE, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
 import db from "../database/db";
-import { artist_projects, ArtistAvailability, artists, ArtistTable, departments, User } from "../database/schemas";
+import { artist_projects, artists } from "../database/schemas";
 import BadRequestException from "../exceptions/badRequestException";
 import ConflictException from "../exceptions/conflictException";
+import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getMultipleRecordsByAColumnValue, getRecordById, getRecordsCount, getSingleRecordByMultipleColumnValues, saveRecord, softDeleteRecordById, updateRecordByColumnValue, updateRecordById } from "../services/baseDbServices";
+import { getMultipleRecordsByAColumnValue, getRecordById, getRecordsCount, getSingleRecordByMultipleColumnValues, saveRecord, softDeleteRecordById, updateRecordById } from "../services/baseDbServices";
+import { getArtistAvailabilities, getArtistDetails, getProjects, importArtistsService, listArtists } from "../services/userServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vArtistSchema, vArtistUpdateSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-import NotFoundException from "../exceptions/notFoundException";
-import { getArtistAvailabilities, getArtistDetails, getProjects, importArtistsService, listArtists } from "../services/userServices";
 
 
 export class UserHandler {
@@ -25,8 +26,8 @@ export class UserHandler {
     if (isArtistExists) {
       throw new ConflictException(ARTISTS_EXISTS);
     }
-    const { available_dates = [], ...artistData } = validatedReqData;
-    const availableDates: ArtistAvailability[] = available_dates.map((date) => ({ date, status: "Available" }));
+    const { available_dates, ...artistData } = validatedReqData;
+    const availableDates: ArtistAvailability[] = available_dates ? available_dates.map(date => ({ date, status: "Available" })) : [];
     const artistsData = await saveRecord<ArtistTable>(artists, { ...artistData, invited_by: user.id, available_dates: availableDates });
     return sendResponse(c, 200, ARTIST_INSERTED, artistsData);
   });
@@ -42,8 +43,8 @@ export class UserHandler {
     if (searchString) {
       filters.push(ilike(artists.full_name, `%${searchString}%`));
     }
-    if(departmentId){
-      filters.push(eq(artists.department_id,departmentId))
+    if (departmentId) {
+      filters.push(eq(artists.department_id, departmentId));
     }
     const [allArtists, totalRecords] = await Promise.all([
       listArtists(page, limit, filters),
@@ -55,13 +56,12 @@ export class UserHandler {
   });
 
   getArtistProjects = factory.createHandlers(async (c: Context) => {
-    const id = +c.req.param("id");
-    const page = +(c.req.query("page") || 1);
-    const limit = +(c.req.query("limit") || 10);
-    if (!id)
-      throw new BadRequestException(USER_ID_REQUIRED);
-    const filters = [eq(artist_projects.artist_id, id)];
-
+    const artistId = Number(c.req.param("id"));
+    const page = Number(c.req.query("page")) || 1;
+    const limit = Number(c.req.query("limit")) || 10;
+    if (!artistId)
+      throw new BadRequestException(ARTIST_ID_REQUIRED);
+    const filters = [eq(artist_projects.artist_id, artistId)];
     const [records, totalRecords] = await Promise.all([
       getProjects(page, limit, filters),
       getRecordsCount(artist_projects, filters),
@@ -72,37 +72,34 @@ export class UserHandler {
   });
 
   getArtist = factory.createHandlers(async (c: Context) => {
-    const id = +c.req.param("id");
-    if (!id)
+    const artistId = +c.req.param("id");
+    if (!artistId)
       throw new BadRequestException(USER_ID_REQUIRED);
-    const user = await getArtistDetails(id);
+    const user = await getArtistDetails(artistId);
+    if (!user)
+      throw new NotFoundException(USER_NOT_FOUND);
     return sendResponse(c, 200, USER_FETCHED, user);
   });
+
   getArtistsDropdown = factory.createHandlers(async (c: Context) => {
     const user: User = c.get("user_payload");
     const result = await getMultipleRecordsByAColumnValue(artists, "invited_by", "=", user.id, ["id", "full_name"]);
     return sendResponse(c, 200, ARTISTS_FETCHED, result);
   });
-  updateArtist = factory.createHandlers(async (c:Context)=>{
+
+  updateArtist = factory.createHandlers(async (c: Context) => {
     const artistId = +c.req.param("id");
     const reqData = await c.req.json();
-    const validatedReqData = validateRequestBody(vArtistUpdateSchema,reqData)
-    let {available_dates,...artistData} = validatedReqData
-    const payload = {...artistData,
-      ...(Array.isArray(available_dates) && available_dates.length > 0
-      ? {
-          available_dates: available_dates.map((date: string) => ({
-            date,
-            status: "Available",
-          })) as ArtistAvailability[],
-        }
-      : {}),
-     };
-    const isArtistExists = await getRecordById(artists,artistId)
-    if(!isArtistExists) throw new NotFoundException(USER_NOT_FOUND)
-    const artist = await updateRecordById(artists,artistId,payload)
-    return sendResponse(c,200,USER_UPDATED,artist)
-})
+    const validatedReqData = validateRequestBody(vArtistUpdateSchema, reqData);
+    const isArtistExists = await getRecordById(artists, artistId);
+    if (!isArtistExists)
+      throw new NotFoundException(USER_NOT_FOUND);
+    const { available_dates, ...artistData } = validatedReqData;
+    const availableDates: ArtistAvailability[] = available_dates ? available_dates.map(date => ({ date, status: "Available" })) : [];
+    const payload = { ...artistData, availableDates}
+    const artist = await updateRecordById(artists, artistId, payload);
+    return sendResponse(c, 200, USER_UPDATED, artist);
+  });
 
   importArtists = factory.createHandlers(async (c: Context) => {
     const body = await c.req.parseBody();
@@ -143,7 +140,6 @@ export class UserHandler {
 
   downloadArtists = factory.createHandlers(async (c: Context) => {
     const user: User = c.get("user_payload");
-
     const records = await db
       .select()
       .from(artists)
@@ -167,21 +163,20 @@ export class UserHandler {
     const artistId = Number(c.req.param("id"));
     if (!artistId)
       throw new BadRequestException("Artist id is required");
-    const artist = await getRecordById(artists,artistId)
-    if(!artist) throw new NotFoundException(ARTIST_NOT_FOUND)
+    const artist = await getRecordById(artists, artistId);
+    if (!artist)
+      throw new NotFoundException(ARTIST_NOT_FOUND);
     const dates = await getArtistAvailabilities(artistId);
-    return sendResponse(c, 200, "Artist available dates fetched successfully", dates);
+    return sendResponse(c, 200, AVAILABLE_DATES , dates);
   });
 
-  deleteArtist = factory.createHandlers(async (c:Context)=>{
-    const artistId = +c.req.param("id")
-    const projects = await getMultipleRecordsByAColumnValue(artist_projects,"artist_id","=",artistId)
-    if(projects){
-      throw new BadRequestException("Cannot delete artist who is a member of project")
+
+   deleteArtist = factory.createHandlers(async (c: Context) => {
+    const artistId = +c.req.param("id");
+    const projects = await getMultipleRecordsByAColumnValue(artist_projects, "artist_id", "=", artistId);
+    if (projects) {
+      throw new BadRequestException(CANNOT_DELETE);
     }
-    await softDeleteRecordById(artists,artistId,{deleted_at:null})
-  })
-
-
-  
+    await softDeleteRecordById(artists, artistId, { deleted_at: new Date });
+  });
 }

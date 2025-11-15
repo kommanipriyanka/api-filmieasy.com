@@ -52,6 +52,7 @@ export const GENDER_REQUIRED = "Gender is required";
 export const DEPARTMENT_ID_REQUIRED = "Department is required";
 export const ROLE_TYPE_REQUIRED = "Role type is required";
 export const ARTIST_NOT_FOUND = "Artist not found";
+export const ARTIST_ID_REQUIRED = "Artist id is required";
 
 export const PROJECT_CREATED = "Project created successfully";
 export const PROJECT_NAME_REQUIRED = "Name is required";
@@ -78,3 +79,5 @@ export const LOCATIONS_FETCHED = "All Locations fetched successfully";
 export const PROJECT_LOCATIONS = "Project locations fetched successfully";
 
 export const BLOCKED_DATES = "Blocked dates fetched successfully";
+export const AVAILABLE_DATES  = "Artist available dates fetched successfully";
+export const CANNOT_DELETE = "Cannot delete artist who is a member of project"

@@ -3,7 +3,7 @@ import { date, integer, jsonb, pgTable, serial, text, timestamp, uniqueIndex, va
 
 import { artist_scenes } from "./artistScenes";
 import { departments } from "./department";
-import { genderEnum, roleTypeEnum } from "./enums";
+import { currencyTypeEnum, genderEnum, paymentTypeEnum, rateTypeEnum, roleTypeEnum } from "./enums";
 import { users } from "./users";
 
 export interface ArtistAvailability {
@@ -11,6 +11,7 @@ export interface ArtistAvailability {
   status: "Available" | "Unavailable";
   notes?: string;
 }
+
 export const artists = pgTable("artists", {
   id: serial("id").primaryKey().notNull(),
   full_name: varchar("full_name"),
@@ -26,13 +27,18 @@ export const artists = pgTable("artists", {
   invited_by: integer("invited_by").references(() => users.id),
   available_dates: jsonb("available_dates").$type<ArtistAvailability[]>().notNull().default([]),
   profile_pic: varchar("profile_pic"),
+  payment_type: paymentTypeEnum("payment_type"),
+  payment_details: jsonb("payment_details").$type<{ bank_name?: string; account_number?: string; ifsc_code?: string; branch_name?: string; upi_id?: string; name?: string } | null>(),
+  rate_type: rateTypeEnum("rate_type"),
+  currency_type: currencyTypeEnum("currency_type").default("INR"),
+  amount:integer("amount"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
-  deleted_at: timestamp("deleted_at")
-
+  deleted_at: timestamp("deleted_at"),
 }, table => [
   uniqueIndex("validUserIdx").on(table.email, table.invited_by),
 ]);
+
 export type Artist = typeof artists.$inferSelect;
 export type NewArtist = typeof artists.$inferInsert;
 export type ArtistTable = typeof artists;
