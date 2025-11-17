@@ -1,10 +1,8 @@
 import type { Context } from "hono";
 import { eq, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
-import type { ArtistAvailability, ArtistTable, User } from "../database/schemas";
-import { ARTIST_ID_REQUIRED, ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, AVAILABLE_DATES, CANNOT_DELETE, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
+import { ARTIST_ID_REQUIRED, ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, AVAILABLE_DATES, CANNOT_DELETE, NO_FILE_UPLOADED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
 import db from "../database/db";
-import { artist_projects, artists } from "../database/schemas";
 import BadRequestException from "../exceptions/badRequestException";
 import ConflictException from "../exceptions/conflictException";
 import NotFoundException from "../exceptions/notFoundException";
@@ -15,7 +13,9 @@ import { getArtistAvailabilities, getArtistDetails, getProjects, importArtistsSe
 import { sendResponse } from "../utils/sendResponse";
 import { vArtistSchema, vArtistUpdateSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-
+import { ArtistAvailability, artists, ArtistTable } from "../database/schemas/artists";
+import { User } from "../database/schemas/users";
+import { artist_projects } from "../database/schemas/artistProjects";
 
 export class UserHandler {
   inviteArtists = factory.createHandlers(async (c: Context) => {
@@ -27,7 +27,7 @@ export class UserHandler {
       throw new ConflictException(ARTISTS_EXISTS);
     }
     const { available_dates, ...artistData } = validatedReqData;
-    const availableDates: ArtistAvailability[] = available_dates ? available_dates.map(date => ({ date, status: "Available" })) : [];
+    const availableDates: ArtistAvailability[] = available_dates ? available_dates.map((date: any) => ({ date, status: "Available" })) : [];
     const artistsData = await saveRecord<ArtistTable>(artists, { ...artistData, invited_by: user.id, available_dates: availableDates });
     return sendResponse(c, 200, ARTIST_INSERTED, artistsData);
   });
@@ -83,7 +83,7 @@ export class UserHandler {
 
   getArtistsDropdown = factory.createHandlers(async (c: Context) => {
     const user: User = c.get("user_payload");
-    const result = await getMultipleRecordsByAColumnValue(artists, "invited_by", "=", user.id, ["id", "full_name"]);
+    const result = await getMultipleRecordsByAColumnValue(artists, "invited_by", "=", user.id, ["id", "email"]);
     return sendResponse(c, 200, ARTISTS_FETCHED, result);
   });
 
@@ -96,7 +96,7 @@ export class UserHandler {
       throw new NotFoundException(USER_NOT_FOUND);
     const { available_dates, ...artistData } = validatedReqData;
     const availableDates: ArtistAvailability[] = available_dates ? available_dates.map(date => ({ date, status: "Available" })) : [];
-    const payload = { ...artistData, availableDates}
+    const payload = { ...artistData, availableDates };
     const artist = await updateRecordById(artists, artistId, payload);
     return sendResponse(c, 200, USER_UPDATED, artist);
   });
@@ -105,7 +105,7 @@ export class UserHandler {
     const body = await c.req.parseBody();
     const file = body.file as File;
     if (!file) {
-      return sendResponse(c, 400, "No file uploaded");
+      throw new BadRequestException(NO_FILE_UPLOADED);
     }
     const user: User = c.get("user_payload");
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -167,16 +167,15 @@ export class UserHandler {
     if (!artist)
       throw new NotFoundException(ARTIST_NOT_FOUND);
     const dates = await getArtistAvailabilities(artistId);
-    return sendResponse(c, 200, AVAILABLE_DATES , dates);
+    return sendResponse(c, 200, AVAILABLE_DATES, dates);
   });
 
-
-   deleteArtist = factory.createHandlers(async (c: Context) => {
+  deleteArtist = factory.createHandlers(async (c: Context) => {
     const artistId = +c.req.param("id");
     const projects = await getMultipleRecordsByAColumnValue(artist_projects, "artist_id", "=", artistId);
     if (projects) {
       throw new BadRequestException(CANNOT_DELETE);
     }
-    await softDeleteRecordById(artists, artistId, { deleted_at: new Date });
+    await softDeleteRecordById(artists, artistId, { deleted_at: new Date() });
   });
 }

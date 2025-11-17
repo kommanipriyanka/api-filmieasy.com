@@ -1,13 +1,13 @@
 import { desc, eq, sql } from "drizzle-orm";
-import type { ArtistProjectTable, ArtistSceneTable, newArtistScene, Scene, SceneTable } from "../database/schemas";
-import type { createScene } from "../validations/sceneValidations";
+import { Scene, scenes, SceneTable } from "../database/schemas";
+import {artist_scenes, ArtistSceneTable } from "../database/schemas/artistScenes"
+import  { Transaction } from "../types/dbTypes";
+import  { createScene } from "../validations/sceneValidations";
 import db from "../database/db";
-import {  artist_scenes, scenes } from "../database/schemas";
 import { deleteRecordById, deleteRecordsByAColumnValue, saveRecord, saveRecords } from "./baseDbServices";
 import { S3Service } from "./fileServices";
 import { upsertArtistProjectDates } from "./projectServices";
 import { setArtistsAvailabilityForDates } from "./userServices";
-import { Transaction } from "../types/dbTypes";
 
 const s3Service = new S3Service();
 
@@ -43,7 +43,6 @@ export async function getScenes(projectId: number, page: number, limit: number) 
   );
 }
 
-
 export async function createScenes(data: createScene, projectId: number) {
   return db.transaction(async (trx) => {
     const { scene_members, start_date, end_date, ...sceneFields } = data;
@@ -57,19 +56,19 @@ export async function createScenes(data: createScene, projectId: number) {
       trx,
     );
     const dates = buildDateRangeFromScene(scene);
-    await setArtistsAvailabilityForDates(members, dates, "Available",trx);
-    const scenesPayload = dates.map(date => ({scene_id: scene.id,date,status: "Upcoming" as const,}));
-    await Promise.all(members.map(artist_id => upsertArtistProjectDates(trx, projectId, artist_id, scenesPayload)),);
+    await setArtistsAvailabilityForDates(members, dates, "Available", trx);
+    const scenesPayload = dates.map(date => ({ scene_id: scene.id, date, status: "Upcoming" as const }));
+    await Promise.all(members.map(artist_id => upsertArtistProjectDates(trx, projectId, artist_id, scenesPayload)));
     return scene;
   });
 }
 export async function getArtistIdsForScene(sceneId: number, trx: Transaction) {
-  const client = trx ?? db
+  const client = trx ?? db;
   const rows = await client
     .select({ artist_id: artist_scenes.artist_id })
     .from(artist_scenes)
     .where(eq(artist_scenes.scene_id, sceneId));
-  return (rows || []).map((r) => Number(r.artist_id));
+  return (rows || []).map(r => Number(r.artist_id));
 }
 
 export function removeScene(sceneId: number, projectId: number, trx: any) {
@@ -95,8 +94,8 @@ export function removeScene(sceneId: number, projectId: number, trx: any) {
 export function buildDateRangeFromScene(scene: Scene) {
   const dates: string[] = [];
 
-  let cur = new Date(scene.start_date + "T00:00:00Z");
-  const last = new Date(scene.end_date + "T00:00:00Z");
+  const cur = new Date(`${scene.start_date}T00:00:00Z`);
+  const last = new Date(`${scene.end_date}T00:00:00Z`);
 
   while (cur <= last) {
     dates.push(cur.toISOString().slice(0, 10));
@@ -106,7 +105,6 @@ export function buildDateRangeFromScene(scene: Scene) {
   return dates;
 }
 
-
 export async function deleteScene(scene: Scene) {
   return db.transaction(async (trx) => {
     const projectId = scene.project_id;
@@ -114,7 +112,7 @@ export async function deleteScene(scene: Scene) {
     await deleteRecordsByAColumnValue(artist_scenes, "scene_id", scene.id, trx);
     await removeScene(scene.id, projectId!, trx);
     const dates = buildDateRangeFromScene(scene);
-    const freedCount = await setArtistsAvailabilityForDates(artistIds, dates, "Available",trx);
+    const freedCount = await setArtistsAvailabilityForDates(artistIds, dates, "Available", trx);
     await deleteRecordById(scenes, scene.id);
     return {
       deletedSceneId: scene.id,

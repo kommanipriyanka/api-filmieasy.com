@@ -1,10 +1,12 @@
 import { and, desc, eq, ilike, sql } from "drizzle-orm";
-import type { ArtistAvailability } from "../database/schemas/artists";
+
+
 import db from "../database/db";
-import { artists } from "../database/schemas/artists";
+import {ArtistAvailability, artists} from "../database/schemas/artists"
+import {  departments } from "../database/schemas";
 import { projects } from "../database/schemas/projects";
 import { S3Service } from "./fileServices";
-import { departments } from "../database/schemas";
+
 const s3Service = new S3Service();
 export async function listArtists(page: number, limit: number, filters: any[]) {
   const offset = (page - 1) * limit;
@@ -67,14 +69,14 @@ export async function getArtistDetails(id: number) {
   return { ...userDetails, profile_pic_url };
 };
 
-export async function getDepartments(search_string?:string){
+export async function getDepartments(search_string?: string) {
   const rows = await db.query.departments.findMany({
     where: search_string ? ilike(departments.name, `%${search_string}%`) : undefined,
-    orderBy:desc(departments.created_at),
+    orderBy: desc(departments.created_at),
     with: {
       artists: {
         columns: {
-          id: true, 
+          id: true,
         },
       },
     },
@@ -176,14 +178,14 @@ export async function getArtistAvailabilities(artistId: number) {
 //   return Array.isArray(res) ? res.length : 0;
 // }
 
-
 export async function setArtistsAvailabilityForDates(
   artistIds: number[],
   dates: string[] | string,
   status: "Available" | "Unavailable",
   trx?: any,
 ): Promise<number> {
-  if (!artistIds?.length || !dates || !status) return 0;
+  if (!artistIds?.length || !dates || !status)
+    return 0;
 
   const client = trx ?? db;
   const datesArr = Array.isArray(dates) ? dates : [dates];
@@ -214,4 +216,3 @@ export async function setArtistsAvailabilityForDates(
 
   return Array.isArray(res) ? res.length : 0;
 }
-

@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
 import { PROJECT_NAME_REQUIRED, SCENE_NAME_REQUIRED } from "../constants/appMessages";
+
 const isValidDate = (value: string) => !Number.isNaN(Date.parse(value));
 
 export const vUpdateProject = v.pipe(

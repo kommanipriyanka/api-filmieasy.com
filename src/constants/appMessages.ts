@@ -79,5 +79,7 @@ export const LOCATIONS_FETCHED = "All Locations fetched successfully";
 export const PROJECT_LOCATIONS = "Project locations fetched successfully";
 
 export const BLOCKED_DATES = "Blocked dates fetched successfully";
-export const AVAILABLE_DATES  = "Artist available dates fetched successfully";
-export const CANNOT_DELETE = "Cannot delete artist who is a member of project"
+export const AVAILABLE_DATES = "Artist available dates fetched successfully";
+export const CANNOT_DELETE = "Cannot delete artist who is a member of project";
+
+export const NO_FILE_UPLOADED = " File is not uploaded";

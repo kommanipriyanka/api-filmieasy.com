@@ -31,7 +31,7 @@ export const artists = pgTable("artists", {
   payment_details: jsonb("payment_details").$type<{ bank_name?: string; account_number?: string; ifsc_code?: string; branch_name?: string; upi_id?: string; name?: string } | null>(),
   rate_type: rateTypeEnum("rate_type"),
   currency_type: currencyTypeEnum("currency_type").default("INR"),
-  amount:integer("amount"),
+  amount: integer("amount"),
   created_at: timestamp("created_at").defaultNow(),
   updated_at: timestamp("updated_at").defaultNow(),
   deleted_at: timestamp("deleted_at"),

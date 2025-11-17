@@ -1,10 +1,11 @@
 import { and, desc, eq, ilike, inArray, sql } from "drizzle-orm";
-import type { SceneTable } from "../database/schemas";
-import type { ArtistProjectTable, CallSheetData } from "../database/schemas/artistProjects";
-import type { CreateProjectWithScenes, UpdateProject } from "../validations/projectValidations";
+
+import  {  scenes, SceneTable } from "../database/schemas/scenes";
+import { artist_scenes } from "../database/schemas/artistScenes";
+import  { artist_projects, ArtistProjectTable, CallSheetData } from "../database/schemas/artistProjects";
+import  { CreateProjectWithScenes, UpdateProject } from "../validations/projectValidations";
+
 import db from "../database/db";
-import { artist_scenes, scenes } from "../database/schemas";
-import { artist_projects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
 import { projects } from "../database/schemas/projects";
 import { deleteRecordsByAColumnValue, getRecordsCount, saveRecord, saveRecords, updateRecordById } from "./baseDbServices";
@@ -74,12 +75,12 @@ export async function createProjectWithScenes(userId: number, data: CreateProjec
         const { scene_members, ...sceneFields } = sceneData;
         const scene = await saveRecord<SceneTable>(scenes, { ...sceneFields, project_id: project.id }, trx);
         if (scene_members?.length && sceneFields.start_date) {
-          await setArtistsAvailabilityForDates( scene_members, sceneFields.start_date,"Unavailable",trx);
+          await setArtistsAvailabilityForDates(scene_members, sceneFields.start_date, "Unavailable", trx);
           const startDate = sceneFields.start_date;
           const callSheetRecords = scene_members.map(id => ({
             artist_id: id,
             project_id: project.id,
-            dates: [{date: startDate,scene_id: scene.id,status: "Upcoming" as const,},],
+            dates: [{ date: startDate, scene_id: scene.id, status: "Upcoming" as const }],
           }));
           await saveRecords<ArtistProjectTable>(artist_projects, callSheetRecords, trx);
         }

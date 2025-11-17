@@ -1,20 +1,19 @@
 import type { Context } from "hono";
 import { eq } from "drizzle-orm";
-import  { User } from "../database/schemas/users";
 import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_NOT_FOUND, PROJECT_UPDATED, PROJECT_USERS_FETCHED, PROJECTS_FETCHED, USER_NOT_FOUND } from "../constants/appMessages";
 import { artist_projects } from "../database/schemas/artistProjects";
 import { projects } from "../database/schemas/projects";
-import { users } from "../database/schemas/users";
 import BadRequestException from "../exceptions/badRequestException";
 import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getRecordById, getRecordsCount, getSingleRecordByAColumnValue } from "../services/baseDbServices";
+import { getRecordById, getRecordsCount } from "../services/baseDbServices";
 import { S3Service } from "../services/fileServices";
 import { createProjectWithScenes, getUsers, listProjects, updateProjectWithTeamMembers } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateProjectWithScenes, vUpdateProject } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+import { User, users } from "../database/schemas/users";
 
 const s3Service = new S3Service();
 
@@ -25,8 +24,9 @@ export class ProjectHandler {
     const limit = Number(c.req.query("limit")) || 10;
     if (!projectId)
       throw new BadRequestException(PROJECT_ID_REQUIRED);
-    const project = await getRecordById(projects,projectId)
-    if(!project) throw new BadRequestException(PROJECT_NOT_FOUND)
+    const project = await getRecordById(projects, projectId);
+    if (!project)
+      throw new BadRequestException(PROJECT_NOT_FOUND);
     const filters = [eq(artist_projects.project_id, projectId)];
     const [records, totalRecords] = await Promise.all([
       getUsers(projectId, page, limit),
@@ -41,7 +41,7 @@ export class ProjectHandler {
     const projectId = +c.req.param("id");
     if (!projectId)
       throw new BadRequestException(PROJECT_ID_REQUIRED);
-    const project = await getRecordById(projects,projectId);
+    const project = await getRecordById(projects, projectId);
     if (!project)
       throw new NotFoundException(PROJECT_NOT_FOUND);
     let project_logo_url: string | null = null;

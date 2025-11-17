@@ -18,6 +18,6 @@ export const projectStatusEnum = pgEnum("status", ["TODO", "ONGOING", "COMPLETED
 
 export const paymentTypeEnum = pgEnum("payment_type", ["BANK", "UPI", "CASH"]);
 
-export const rateTypeEnum = pgEnum("rate_type",["HOUR","DAY","PROJECT"]);
+export const rateTypeEnum = pgEnum("rate_type", ["HOUR", "DAY", "PROJECT"]);
 
-export const currencyTypeEnum = pgEnum("currency_type",["INR","DOLLARS"]);
+export const currencyTypeEnum = pgEnum("currency_type", ["INR", "DOLLARS"]);
