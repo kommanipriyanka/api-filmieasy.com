@@ -62,6 +62,7 @@ export const PROJECT_DETAILS = "Project details fetched successfully";
 export const PROJECTS_FETCHED = "Projects fetched successfully";
 export const PROJECT_NOT_FOUND = "Project not found";
 export const PROJECT_UPDATED = "Project updated successfully";
+export const PROJECT_EXISTS = "Project already exists";
 
 export const UPLOAD_URL = "Upload url generated successfully";
 export const FILE_NAME_REQUIRED = "File name is required";

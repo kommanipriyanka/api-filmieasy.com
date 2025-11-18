@@ -1,11 +1,8 @@
-import type { Context } from "hono";
-
+import { Context } from "hono";
 import { eq, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
-
 import  { ArtistAvailability, ArtistTable } from "../database/schemas/artists";
 import  { User } from "../database/schemas/users";
-
 import { ARTIST_ID_REQUIRED, ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, AVAILABLE_DATES, CANNOT_DELETE, NO_FILE_UPLOADED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
 import db from "../database/db";
 import { artist_projects } from "../database/schemas/artistProjects";
@@ -16,7 +13,7 @@ import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
 import { getMultipleRecordsByAColumnValue, getRecordById, getRecordsCount, getSingleRecordByMultipleColumnValues, saveRecord, softDeleteRecordById, updateRecordById } from "../services/baseDbServices";
-import { getArtistAvailabilities, getArtistDetails, getProjects, importArtistsService, listArtists } from "../services/userServices";
+import { getArtistAvailabilities, getArtistDetails, getArtistsDropdownService, getProjects, importArtistsService, listArtists } from "../services/userServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vArtistSchema, vArtistUpdateSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
@@ -87,9 +84,11 @@ export class UserHandler {
 
   getArtistsDropdown = factory.createHandlers(async (c: Context) => {
     const user: User = c.get("user_payload");
-    const result = await getMultipleRecordsByAColumnValue(artists, "invited_by", "=", user.id, ["id", "email"]);
+    const search_string = c.req.query("search_string");
+    const result = await getArtistsDropdownService(user.id, search_string);
     return sendResponse(c, 200, ARTISTS_FETCHED, result);
   });
+
 
   updateArtist = factory.createHandlers(async (c: Context) => {
     const artistId = +c.req.param("id");

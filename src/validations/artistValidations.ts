@@ -53,8 +53,15 @@ export const vArtistObject = v.object({
   full_name: v.pipe(
     v.string(NAME_REQUIRED),
     v.nonEmpty(NAME_REQUIRED),
-    v.transform(s => String(s ?? "").trim()),
     v.check(s => /^[\p{L} ]+$/u.test(s), "Full name can contain only letters and spaces"),
+    v.transform(value => {
+      return String(value ?? "")
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+    })
   ),
   gender: v.pipe(
     v.string(GENDER_REQUIRED),
@@ -65,6 +72,7 @@ export const vArtistObject = v.object({
   role_type: v.pipe(
     v.string(ROLE_TYPE_REQUIRED),
     v.nonEmpty(ROLE_TYPE_REQUIRED),
+    v.transform(val => val.toUpperCase()),
     v.picklist(roleTypeEnum.enumValues, "Invalid role type"),
   ),
   experience: v.optional(v.number()),
@@ -89,17 +97,26 @@ export const vArtistObject = v.object({
   ),
   address: v.optional(
     v.pipe(
-      v.union([v.string(), v.array(v.string()), v.null()]),
-      v.transform((val) => {
-        const parts = Array.isArray(val)
-          ? val
-          : String(val ?? "").split(/[,\r\n]+/);
-        const joined = parts.map(p => String(p).trim()).filter(Boolean).join(", ");
-        return joined === "" ? undefined : joined;
-      }),
-    ),
+      v.union([v.string(), v.null()]),
+      v.transform(val => {
+        const parts = String(val ?? "")
+        .split(",")
+        .map(p => p.trim())
+        .filter(Boolean)
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase());
+        return parts.length ? parts.join(", ") : undefined;
+      })
+    )
   ),
-  languages: v.optional(v.pipe(v.union([v.array(v.string()), v.null()]), v.transform(val => (val === null ? undefined : val)))),
+  languages: v.optional(
+    v.pipe(
+      v.union([v.array(v.string()), v.null()]),
+      v.transform(val => val ?? undefined),
+      v.transform((arr?: string[]) =>
+        arr?.map(l =>String(l).trim().toLowerCase().replace(/^./, c => c.toUpperCase()))
+      )
+    )
+  ),
   available_dates: v.optional(v.pipe(
     v.union([vAvailableDateArray, v.null()]),
     v.transform(val => (val === null ? undefined : val)),

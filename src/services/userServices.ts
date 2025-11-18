@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, sql } from "drizzle-orm";
 
 import { ArtistAvailability } from "../database/schemas/artists";
 
@@ -105,6 +105,26 @@ export async function importArtistsService(records: any[]) {
     skippedDuplicates: records.length - inserted.length,
   };
 }
+
+export async function getArtistsDropdownService(userId: number, search_string?: string) {
+  const where = and(
+    eq(artists.invited_by, userId),
+    search_string
+      ? ilike(artists.email, `%${search_string}%`)
+      : undefined
+    );
+
+  const rows = await db.query.artists.findMany({
+    where,
+    columns: {
+      id: true,
+      email: true,
+    },
+    orderBy: artists.email,
+  });
+  return rows;
+}
+
 
 export async function getArtistAvailabilities(artistId: number) {
   const artist = await db.query.artists.findFirst({

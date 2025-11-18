@@ -12,12 +12,13 @@ import BadRequestException from "../exceptions/badRequestException";
 import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
 import { getPaginationData } from "../helpers/paginationHelpers";
-import { getRecordById, getRecordsCount } from "../services/baseDbServices";
+import { getRecordById, getRecordsCount, getSingleRecordByMultipleColumnValues } from "../services/baseDbServices";
 import { S3Service } from "../services/fileServices";
 import { createProjectWithScenes, getUsers, listProjects, updateProjectWithTeamMembers } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
 import { vCreateProject, vUpdateProject } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
+import ConflictException from "../exceptions/conflictException";
 
 const s3Service = new S3Service();
 
@@ -73,6 +74,8 @@ export class ProjectHandler {
     const user: User = c.get("user_payload");
     const reqData = await c.req.json();
     const validatedData = validateRequestBody(vCreateProject, reqData);
+    const isProjectExists = await getSingleRecordByMultipleColumnValues(projects,["name","created_by"],["=","="],[validatedData.name,user.id])
+    if(isProjectExists) throw new ConflictException("PROJECT_EXISTS")
     const result = await createProjectWithScenes(user.id, validatedData);
     return sendResponse(c, 200, PROJECT_CREATED, result);
   });

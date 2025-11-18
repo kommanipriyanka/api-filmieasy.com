@@ -20,9 +20,9 @@ export const vUpdateProject = v.pipe(
           .join(" ");
       }),
     )),
-    description: v.optional(v.string()),
-    genre: v.optional(v.string()),
-    languages: v.optional(v.array(v.string())),
+    description: v.optional(v.pipe(v.string(),v.transform(s =>String(s ?? "").trim().replace(/^./, c => c.toUpperCase())))),
+    genre: v.optional(v.pipe(v.string(),v.transform(s =>String(s ?? "").trim().replace(/^./, c => c.toUpperCase())))),
+    languages: v.optional(v.pipe(v.array(v.string()),v.transform(arr =>arr.map(l =>String(l ?? "").trim().replace(/^./, c => c.toUpperCase()))))),
     estimated_budget: v.optional(v.number()),
     start_date: v.optional(
       v.pipe(
@@ -54,21 +54,27 @@ export const vScene = v.pipe(
     name: v.pipe(
       v.string(SCENE_NAME_REQUIRED),
       v.nonEmpty(SCENE_NAME_REQUIRED),
+      v.transform((value) => {
+        return value
+          .trim()
+          .toLowerCase()
+          .split(/\s+/)
+          .map(word =>
+            /^\d/.test(word) ? word : word.charAt(0).toUpperCase() + word.slice(1),
+          )
+          .join(" ");
+      }),
     ),
-
-    description: v.optional(v.string()),
-
-    scene_members: v.optional(v.array(v.number())),
-    scene_path: v.optional(v.string()),
-
-    start_date: v.optional(
+  description: v.optional(v.pipe(v.string(),v.transform(s =>String(s ?? "").trim().replace(/^./, c => c.toUpperCase())))),
+  scene_members: v.optional(v.array(v.number())),
+  scene_path: v.optional(v.string()),
+  start_date: v.optional(
       v.pipe(
         v.string(),
         v.check(value => isValidDate(value), "Invalid start_date format"),
       ),
     ),
-
-    end_date: v.optional(
+  end_date: v.optional(
       v.pipe(
         v.string(),
         v.check(value => isValidDate(value), "Invalid end_date format"),
