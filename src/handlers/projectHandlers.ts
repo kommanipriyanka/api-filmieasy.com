@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import  { User } from "../database/schemas/users";
 
-import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_NOT_FOUND, PROJECT_UPDATED, PROJECT_USERS_FETCHED, PROJECTS_FETCHED, USER_NOT_FOUND } from "../constants/appMessages";
+import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_EXISTS, PROJECT_ID_REQUIRED, PROJECT_NOT_FOUND, PROJECT_UPDATED, PROJECT_USERS_FETCHED, PROJECTS_FETCHED, USER_NOT_FOUND } from "../constants/appMessages";
 import { artist_projects } from "../database/schemas/artistProjects";
 import { projects } from "../database/schemas/projects";
 import { users } from "../database/schemas/users";
@@ -75,7 +75,7 @@ export class ProjectHandler {
     const reqData = await c.req.json();
     const validatedData = validateRequestBody(vCreateProject, reqData);
     const isProjectExists = await getSingleRecordByMultipleColumnValues(projects,["name","created_by"],["=","="],[validatedData.name,user.id])
-    if(isProjectExists) throw new ConflictException("PROJECT_EXISTS")
+    if(isProjectExists) throw new ConflictException(PROJECT_EXISTS)
     const result = await createProjectWithScenes(user.id, validatedData);
     return sendResponse(c, 200, PROJECT_CREATED, result);
   });
