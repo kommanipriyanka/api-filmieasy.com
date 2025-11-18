@@ -27,6 +27,12 @@ export class UserHandler {
     if (isArtistExists) {
       throw new ConflictException(ARTISTS_EXISTS);
     }
+     if (validatedReqData.phone) {
+      const isPhoneExists = await getSingleRecordByMultipleColumnValues<ArtistTable>(artists,["phone", "invited_by"],["=", "="],[validatedReqData.phone, user.id]);
+      if (isPhoneExists) {
+        throw new ConflictException("Artist already exists with this phone number");
+      }
+    }
     const { available_dates, ...artistData } = validatedReqData;
     const availableDates: ArtistAvailability[] = available_dates ? available_dates.map((date: any) => ({ date, status: "Available" })) : [];
     const artistsData = await saveRecord<ArtistTable>(artists, { ...artistData, invited_by: user.id, available_dates: availableDates });
