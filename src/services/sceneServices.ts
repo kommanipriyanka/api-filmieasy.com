@@ -1,9 +1,13 @@
 import { desc, eq, sql } from "drizzle-orm";
-import { Scene, scenes, SceneTable } from "../database/schemas";
-import {artist_scenes, ArtistSceneTable } from "../database/schemas/artistScenes"
+
+import  { Scene, SceneTable } from "../database/schemas";
+import  { ArtistSceneTable } from "../database/schemas/artistScenes";
 import  { Transaction } from "../types/dbTypes";
 import  { createScene } from "../validations/sceneValidations";
+
 import db from "../database/db";
+import { scenes } from "../database/schemas";
+import { artist_scenes } from "../database/schemas/artistScenes";
 import { deleteRecordById, deleteRecordsByAColumnValue, saveRecord, saveRecords } from "./baseDbServices";
 import { S3Service } from "./fileServices";
 import { upsertArtistProjectDates } from "./projectServices";

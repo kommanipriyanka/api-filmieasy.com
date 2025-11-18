@@ -1,9 +1,10 @@
-import { and, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
+import { ArtistAvailability } from "../database/schemas/artists";
 
 import db from "../database/db";
-import {ArtistAvailability, artists} from "../database/schemas/artists"
-import {  departments } from "../database/schemas";
+import { departments } from "../database/schemas";
+import { artists } from "../database/schemas/artists";
 import { projects } from "../database/schemas/projects";
 import { S3Service } from "./fileServices";
 
@@ -69,9 +70,9 @@ export async function getArtistDetails(id: number) {
   return { ...userDetails, profile_pic_url };
 };
 
-export async function getDepartments(search_string?: string) {
+export async function getDepartments(userId: number) {
   const rows = await db.query.departments.findMany({
-    where: search_string ? ilike(departments.name, `%${search_string}%`) : undefined,
+    where: eq(departments.created_by, userId),
     orderBy: desc(departments.created_at),
     with: {
       artists: {

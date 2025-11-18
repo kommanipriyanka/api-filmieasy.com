@@ -1,8 +1,13 @@
-import type { Context } from "hono";
+import  { Context } from "hono";
+
 import { eq } from "drizzle-orm";
+
+import  { User } from "../database/schemas/users";
+
 import { PROJECT_CREATED, PROJECT_DETAILS, PROJECT_ID_REQUIRED, PROJECT_NOT_FOUND, PROJECT_UPDATED, PROJECT_USERS_FETCHED, PROJECTS_FETCHED, USER_NOT_FOUND } from "../constants/appMessages";
 import { artist_projects } from "../database/schemas/artistProjects";
 import { projects } from "../database/schemas/projects";
+import { users } from "../database/schemas/users";
 import BadRequestException from "../exceptions/badRequestException";
 import NotFoundException from "../exceptions/notFoundException";
 import factory from "../factory";
@@ -11,9 +16,8 @@ import { getRecordById, getRecordsCount } from "../services/baseDbServices";
 import { S3Service } from "../services/fileServices";
 import { createProjectWithScenes, getUsers, listProjects, updateProjectWithTeamMembers } from "../services/projectServices";
 import { sendResponse } from "../utils/sendResponse";
-import { vCreateProjectWithScenes, vUpdateProject } from "../validations/projectValidations";
+import { vCreateProject, vUpdateProject } from "../validations/projectValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-import { User, users } from "../database/schemas/users";
 
 const s3Service = new S3Service();
 
@@ -68,7 +72,7 @@ export class ProjectHandler {
   createProjectWithScenes = factory.createHandlers(async (c: Context) => {
     const user: User = c.get("user_payload");
     const reqData = await c.req.json();
-    const validatedData = validateRequestBody(vCreateProjectWithScenes, reqData);
+    const validatedData = validateRequestBody(vCreateProject, reqData);
     const result = await createProjectWithScenes(user.id, validatedData);
     return sendResponse(c, 200, PROJECT_CREATED, result);
   });

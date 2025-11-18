@@ -1,13 +1,15 @@
 import { and, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 
-import  {  scenes, SceneTable } from "../database/schemas/scenes";
-import { artist_scenes } from "../database/schemas/artistScenes";
-import  { artist_projects, ArtistProjectTable, CallSheetData } from "../database/schemas/artistProjects";
-import  { CreateProjectWithScenes, UpdateProject } from "../validations/projectValidations";
+import type { ArtistProjectTable, CallSheetData } from "../database/schemas/artistProjects";
+import type { SceneTable } from "../database/schemas/scenes";
+import type { CreateProject, UpdateProject } from "../validations/projectValidations";
 
 import db from "../database/db";
+import { artist_projects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
+import { artist_scenes } from "../database/schemas/artistScenes";
 import { projects } from "../database/schemas/projects";
+import { scenes } from "../database/schemas/scenes";
 import { deleteRecordsByAColumnValue, getRecordsCount, saveRecord, saveRecords, updateRecordById } from "./baseDbServices";
 import { S3Service } from "./fileServices";
 import { listArtists, setArtistsAvailabilityForDates } from "./userServices";
@@ -61,7 +63,7 @@ export async function listProjects(page: number, limit: number, userId: number, 
   return { total_records, result };
 }
 
-export async function createProjectWithScenes(userId: number, data: CreateProjectWithScenes) {
+export async function createProjectWithScenes(userId: number, data: CreateProject) {
   return db.transaction(async (trx) => {
     const { project_scenes, ...projectData } = data;
     const project = await saveRecord(projects, { ...projectData, created_by: userId }, trx);

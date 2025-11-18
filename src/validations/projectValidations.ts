@@ -85,7 +85,7 @@ export const vScene = v.pipe(
   ),
 );
 
-export const vCreateProjectWithScenes = v.pipe(
+export const vCreateProject = v.pipe(
   v.object({
     name: v.pipe(
       v.string(PROJECT_NAME_REQUIRED),
@@ -124,4 +124,4 @@ export const vCreateProjectWithScenes = v.pipe(
 );
 
 export type UpdateProject = v.InferInput<typeof vUpdateProject>;
-export type CreateProjectWithScenes = v.InferInput<typeof vCreateProjectWithScenes>;
+export type CreateProject = v.InferInput<typeof vCreateProject>;

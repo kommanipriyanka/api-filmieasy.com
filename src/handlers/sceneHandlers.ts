@@ -1,4 +1,4 @@
-import type { Context } from "hono";
+import { Context } from "hono";
 
 import { eq } from "drizzle-orm";
 

@@ -1,8 +1,15 @@
 import type { Context } from "hono";
+
 import { eq, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
+
+import  { ArtistAvailability, ArtistTable } from "../database/schemas/artists";
+import  { User } from "../database/schemas/users";
+
 import { ARTIST_ID_REQUIRED, ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, AVAILABLE_DATES, CANNOT_DELETE, NO_FILE_UPLOADED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
 import db from "../database/db";
+import { artist_projects } from "../database/schemas/artistProjects";
+import { artists } from "../database/schemas/artists";
 import BadRequestException from "../exceptions/badRequestException";
 import ConflictException from "../exceptions/conflictException";
 import NotFoundException from "../exceptions/notFoundException";
@@ -13,9 +20,6 @@ import { getArtistAvailabilities, getArtistDetails, getProjects, importArtistsSe
 import { sendResponse } from "../utils/sendResponse";
 import { vArtistSchema, vArtistUpdateSchema } from "../validations/artistValidations";
 import { validateRequestBody } from "../validations/validateRequest";
-import { ArtistAvailability, artists, ArtistTable } from "../database/schemas/artists";
-import { User } from "../database/schemas/users";
-import { artist_projects } from "../database/schemas/artistProjects";
 
 export class UserHandler {
   inviteArtists = factory.createHandlers(async (c: Context) => {
