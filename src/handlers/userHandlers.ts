@@ -3,7 +3,7 @@ import { eq, ilike } from "drizzle-orm";
 import * as xlsx from "xlsx";
 import  { ArtistAvailability, ArtistTable } from "../database/schemas/artists";
 import  { User } from "../database/schemas/users";
-import { ARTIST_ID_REQUIRED, ARTIST_INSERTED, ARTIST_NOT_FOUND, ARTISTS_EXISTS, ARTISTS_FETCHED, AVAILABLE_DATES, CANNOT_DELETE, NO_FILE_UPLOADED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
+import {  ARTIST_ALREADY_EXISTS, ARTIST_EXISTS, ARTIST_ID_REQUIRED, ARTIST_INSERTED, ARTIST_NOT_FOUND,  ARTISTS_FETCHED, AVAILABLE_DATES, CANNOT_DELETE, NO_FILE_UPLOADED, USER_FETCHED, USER_ID_REQUIRED, USER_NOT_FOUND, USER_PROJECTS_FETCHED, USER_UPDATED } from "../constants/appMessages";
 import db from "../database/db";
 import { artist_projects } from "../database/schemas/artistProjects";
 import { artists } from "../database/schemas/artists";
@@ -25,12 +25,12 @@ export class UserHandler {
     const validatedReqData = validateRequestBody(vArtistSchema, reqData);
     const isArtistExists = await getSingleRecordByMultipleColumnValues<ArtistTable>(artists, ["email", "invited_by"], ["=", "="], [validatedReqData.email, user.id]);
     if (isArtistExists) {
-      throw new ConflictException(ARTISTS_EXISTS);
+      throw new ConflictException(ARTIST_EXISTS);
     }
      if (validatedReqData.phone) {
       const isPhoneExists = await getSingleRecordByMultipleColumnValues<ArtistTable>(artists,["phone", "invited_by"],["=", "="],[validatedReqData.phone, user.id]);
       if (isPhoneExists) {
-        throw new ConflictException("Artist already exists with this phone number");
+        throw new ConflictException(ARTIST_ALREADY_EXISTS);
       }
     }
     const { available_dates, ...artistData } = validatedReqData;

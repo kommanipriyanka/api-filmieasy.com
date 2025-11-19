@@ -45,7 +45,7 @@ export const DEPARTMENT_REQUIRED = "Department name is required";
 export const DEPARTMENT_EXISTS = "Department already exists";
 export const DEPARTMENTS_FETCHED = "Departments fetched successfully";
 
-export const ARTISTS_EXISTS = "Artist already exists";
+export const ARTIST_EXISTS = "Artist already exists";
 export const ARTIST_INSERTED = "Artist inserted successfully";
 export const ARTISTS_FETCHED = "Artists fetched successfully";
 export const GENDER_REQUIRED = "Gender is required";
@@ -53,6 +53,7 @@ export const DEPARTMENT_ID_REQUIRED = "Department is required";
 export const ROLE_TYPE_REQUIRED = "Role type is required";
 export const ARTIST_NOT_FOUND = "Artist not found";
 export const ARTIST_ID_REQUIRED = "Artist id is required";
+export const  ARTIST_ALREADY_EXISTS = "Artist already exists with this phone number"
 
 export const PROJECT_CREATED = "Project created successfully";
 export const PROJECT_NAME_REQUIRED = "Name is required";
@@ -84,3 +85,7 @@ export const AVAILABLE_DATES = "Artist available dates fetched successfully";
 export const CANNOT_DELETE = "Cannot delete artist who is a member of project";
 
 export const NO_FILE_UPLOADED = " File is not uploaded";
+
+export const DOB_INVALID_FORMAT = "Invalid Data of birth format. Use DD-MM-YYYY";
+export const DOB_INVALID_DATE = "Invalid Date of birth";
+export const DOB_IN_FUTURE = "Date of birth cannot be a future date";

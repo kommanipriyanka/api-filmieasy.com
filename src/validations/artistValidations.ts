@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { DEPARTMENT_ID_REQUIRED, EMAIL_REQUIRED, GENDER_REQUIRED, INVALID_EMAIL, NAME_REQUIRED, PHONE_NO_INVALID, PHONE_NO_REQUIRED, ROLE_TYPE_REQUIRED } from "../constants/appMessages";
+import { DEPARTMENT_ID_REQUIRED, DOB_IN_FUTURE, DOB_INVALID_DATE, DOB_INVALID_FORMAT, EMAIL_REQUIRED, GENDER_REQUIRED, INVALID_EMAIL, NAME_REQUIRED, PHONE_NO_INVALID, PHONE_NO_REQUIRED, ROLE_TYPE_REQUIRED } from "../constants/appMessages";
 import { currencyTypeEnum, genderEnum, paymentTypeEnum, rateTypeEnum, roleTypeEnum } from "../database/schemas/enums";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -79,22 +79,28 @@ export const vArtistObject = v.object({
   department_id: v.number(DEPARTMENT_ID_REQUIRED),
   DOB: v.optional(
     v.pipe(
-      v.union([v.string(), v.null()]),
-      v.transform((raw) => {
-        const s = String(raw ?? "").trim();
-        if (s === "")
-          return undefined;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(s))
-          return s;
-        const dmy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(s);
-        if (dmy) {
-          const [, dd, mm, yyyy] = dmy;
-          return `${yyyy}-${mm}-${dd}`;
-        }
-        return undefined;
-      }),
-    ),
-  ),
+      v.string(),
+      v.nonEmpty(DOB_INVALID_FORMAT),
+      v.regex(/^\d{2}-\d{2}-\d{4}$/, DOB_INVALID_FORMAT),
+      v.check(s => {
+        const [dd, mm, yyyy] = s.split("-");
+        const date = new Date(`${yyyy}-${mm}-${dd}T00:00:00Z`);
+        return (
+          !isNaN(date.getTime()) &&
+          date.getUTCDate() == Number(dd) &&
+          date.getUTCMonth() + 1 == Number(mm) &&
+          date.getUTCFullYear() == Number(yyyy)
+        );
+      }, DOB_INVALID_DATE),
+      v.check(s => {
+      const [dd, mm, yyyy] = s.split("-");
+      const input = `${yyyy}-${mm}-${dd}`;
+      const today = new Date().toISOString().slice(0, 10);
+      return input <= today;
+      }, DOB_IN_FUTURE),
+    )
+ ),
+
   address: v.optional(
     v.pipe(
       v.union([v.string(), v.null()]),
