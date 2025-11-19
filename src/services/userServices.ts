@@ -119,10 +119,25 @@ export async function getArtistsDropdownService(userId: number, search_string?: 
     columns: {
       id: true,
       email: true,
+      profile_pic:true
     },
-    orderBy: artists.email,
+    with:{
+      department:{
+        columns:{
+          name:true
+        }
+      }
+    },
+    orderBy: desc(artists.created_at),
   });
-  return rows;
+  return Promise.all(
+    rows.map(async (artist) => ({
+      ...artist,
+      profile_pic_url: artist?.profile_pic
+        ? await s3Service.getPresignedDownloadUrl(artist.profile_pic)
+        : null,
+    }))
+  );
 }
 
 

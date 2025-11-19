@@ -69,33 +69,7 @@ export const vArtistObject = v.object({
   ),
   experience: v.optional(v.number()),
   department_id: v.number(DEPARTMENT_ID_REQUIRED),
-  DOB: v.optional(
-    v.pipe(
-      v.string(),
-      v.nonEmpty(DOB_INVALID_FORMAT),
-      v.regex(/^\d{2}-\d{2}-\d{4}$/, DOB_INVALID_FORMAT),
-      v.check(s => {
-        const [dd, mm, yyyy] = s.split("-");
-        const date = new Date(`${yyyy}-${mm}-${dd}T00:00:00Z`);
-        return (
-          !isNaN(date.getTime()) &&
-          date.getUTCDate() == Number(dd) &&
-          date.getUTCMonth() + 1 == Number(mm) &&
-          date.getUTCFullYear() == Number(yyyy)
-        );
-      }, DOB_INVALID_DATE),
-      v.check(s => {
-        const [dd, mm, yyyy] = s.split("-");
-        const input = `${yyyy}-${mm}-${dd}`;
-        const today = new Date().toISOString().slice(0, 10);
-        return input <= today;
-      }, DOB_IN_FUTURE),
-      v.transform(s => {
-        const [dd, mm, yyyy] = s.split("-");
-        return `${yyyy}-${mm}-${dd}`;  
-      }),
-    )),
-
+ 
   address: v.optional(
     v.pipe(
       v.union([v.string(), v.null()]),
@@ -115,6 +89,34 @@ export const vArtistObject = v.object({
       v.transform(val => val ?? undefined),
       v.transform((arr?: string[]) =>arr?.map(l =>String(l).trim().toLowerCase().replace(/^./, c => c.toUpperCase())))
     )),
+  DOB: v.optional(
+    v.pipe(
+      v.string(),
+      v.nonEmpty(DOB_INVALID_FORMAT),
+      v.regex(/^\d{2}-\d{2}-\d{4}$/, DOB_INVALID_FORMAT),
+      v.check(s => {
+        const [dd, mm, yyyy] = s.split("-");
+        const d = new Date(Date.UTC(Number(yyyy), Number(mm) - 1, Number(dd)));
+        return (
+          !isNaN(d.getTime()) &&
+          d.getUTCDate() === Number(dd) &&
+          d.getUTCMonth() + 1 === Number(mm) &&
+          d.getUTCFullYear() === Number(yyyy)
+        );
+     }, DOB_INVALID_DATE),
+    v.check(s => {
+      const [dd, mm, yyyy] = s.split("-").map(Number);
+      const inputUtcMidnight = Date.UTC(yyyy, mm - 1, dd); 
+      const now = new Date();
+      const todayUtcMidnight = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+      return inputUtcMidnight <= todayUtcMidnight;
+      }, DOB_IN_FUTURE),
+    v.transform(s => {
+      const [dd, mm, yyyy] = s.split("-");
+      return `${yyyy}-${mm}-${dd}`;
+    }),
+  )),
+
   available_dates: v.optional(v.pipe(
     v.union([vAvailableDateArray, v.null()]),
     v.transform(val => (val === null ? undefined : val)),
