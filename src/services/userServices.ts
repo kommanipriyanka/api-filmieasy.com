@@ -118,7 +118,7 @@ export async function getArtistsDropdownService(userId: number, search_string?: 
     where,
     columns: {
       id: true,
-      name:true,
+      full_name:true,
       email: true,
       profile_pic:true
     },
